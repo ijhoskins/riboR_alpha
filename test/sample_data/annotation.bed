@@ -1,0 +1,9 @@
+GAPDH    0   5  UTR5    0   +
+GAPDH   5  15    CDS 0   +
+GAPDH   15  20    UTR3 0   +
+VEGFA    0   4  UTR5    0   +
+VEGFA   4  16    CDS 0   +
+VEGFA   16  22    UTR3 0   +
+MYC    0   3  UTR5    0   +
+MYC   3  10    CDS 0   +
+MYC   10  17    UTR3 0   +
