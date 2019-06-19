@@ -58,32 +58,34 @@ from the read length 'range.lower' to the read length 'range.upper' which in mos
 cases would result in a slow run time with a massive data.table returned.
 }
 \examples{
-#generate the ribo object by loading in a ribo function and calling the \\code{\\link{ribo}} function
-\dontrun{
-sample <- ribo("sample.ribo")
-}
+
+#generate the ribo object by providing the file.path to the ribo file
+file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+sample <- ribo(file.path)
+
 
 #extract the total metagene information for all experiments
 #across the read lengths and transcripts of the start site
-#from read length 15 to 40
-\dontrun{
+#from read length 2 to 5
 metagene_info <- get_metagene(ribo.object = sample,
                               site = "start",
-                              range.lower = 15,
-                              range.upper = 40,
+                              range.lower = 2,
+                              range.upper = 5,
                               length = TRUE,
                               transcript = TRUE,
                               experiments = get_experiments(sample))
-}
+
 
 #Note that length, transcript, and experiments in this case are the
-#default values and can be left out in this case. The following generates the same output.
-\dontrun{
+#default values and can be left out. The following generates the same output.
+
+\donttest{
 metagene_info <- get_metagene(ribo.object = sample,
-                                 site = "start",
-                                 range.lower = 15,
-                                 range.upper = 40)
+                              site = "start",
+                              range.lower = 2,
+                              range.upper = 5)
 }
+
 
 }
 \seealso{

@@ -4,8 +4,8 @@
 \alias{get_coverage}
 \title{Retrieves the coverage data for a given transcript}
 \usage{
-get_coverage(ribo.object, name, range.lower, range.upper,
-  transcript = TRUE, experiments = get_experiments(ribo.object))
+get_coverage(ribo.object, name, range.lower, range.upper, length = TRUE,
+  experiments = get_experiments(ribo.object))
 }
 \arguments{
 \item{ribo.object}{S3 "ribo" class object}
@@ -16,7 +16,7 @@ get_coverage(ribo.object, name, range.lower, range.upper,
 
 \item{range.upper}{Upper bound of the read length}
 
-\item{transcript}{Logical value that denotes if the coverage should be summed across read lengths}
+\item{length}{Logical value that denotes if the coverage should be summed across read lengths}
 
 \item{experiments}{List of experiments to obtain coverage information on}
 }
@@ -29,13 +29,30 @@ data over the length of a given transcript.
 }
 \details{
 The function \code{\link{get_coverage}} first checks the experiments in the
-'experiment.list' parameter to see if they are present in the .ribo file. 
+'experiment.list' parameter to see if they are present in the .ribo file.
 It will then check these experiments for coverage data which is an optional
-dataset. The function checks the coverage of one transcript at a time at 
-each read length from 'range.lower' to 'range.upper', inclusive. However, 
-the parameter 'transcript' allows the user to obtain the coverage 
-information of a transcript across the range of read lengths indicated by 
+dataset. The function checks the coverage of one transcript at a time at
+each read length from 'range.lower' to 'range.upper', inclusive. However,
+the parameter 'length' allows the user to obtain the coverage
+information of a transcript across the range of read lengths indicated by
 'range.lower' and 'range.upper'.
+}
+\examples{
+#generate the ribo object
+file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+sample <- ribo(file.path)
+
+#get the experiments of interest that also contain coverage data
+experiments <- c("Hela_1", "Hela_2", "Hela_3", "WT_1")
+
+#the ribo file contains a transcript named 'MYC'
+coverage.data <- get_coverage(ribo.object = sample,
+                              name = "MYC",
+                              range.lower = 2,
+                              range.upper = 5,
+                              length = TRUE,
+                              experiments = experiments)
+
 }
 \seealso{
 \code{\link{ribo}} to generate the necessary ribo.object parameter

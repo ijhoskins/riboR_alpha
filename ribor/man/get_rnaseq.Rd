@@ -24,13 +24,25 @@ sequence abundance
 }
 \details{
 As a default value, experiment.list is presumed to include all of the
-experiments within a ribo file. RNA-Seq data is an optional dataset to 
-include in a .ribo file. The experiments in experiment.list are checked 
+experiments within a ribo file. RNA-Seq data is an optional dataset to
+include in a .ribo file. The experiments in experiment.list are checked
 for experiment existence in the ribo file and then checked for RNA-seq data.
 
-The returned data.table can either be in the tidy format for easier data 
-cleaning or in a condensed non-tidy format. The data will present RNA-seq abundance 
+The returned data.table can either be in the tidy format for easier data
+cleaning or in a condensed non-tidy format. The data will present RNA-seq abundance
 for each transcript in each valid experiment in experiment.list.
+}
+\examples{
+#generate the ribo object
+file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+sample <- ribo(file.path)
+
+#list out the experiments of interest that have RNA-Seq data
+experiments = c("Hela_1", "Hela_2", "WT_1")
+rnaseq.data <- get_rnaseq(ribo.object = sample,
+                          tidy = TRUE,
+                          experiments = experiments)
+
 }
 \seealso{
 \code{\link{ribo}} to generate the necessary ribo.object parameter

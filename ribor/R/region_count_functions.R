@@ -35,6 +35,24 @@
 #' from the read length 'range.lower' to the read length 'range.upper' which in most
 #' cases would result in a slow run time with a massive data.table returned.
 #'
+#' @examples
+#' #generate the ribo object
+#' file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+#' sample <- ribo(file.path)
+#'
+#' #specify the regions and experiments of interest
+#' regions <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
+#' experiments <- c("Hela_1", "Hela_2", "WT_1")
+#'
+#' #obtains the region counts at each individual read length, summed across every transcript
+#' region.counts <- get_region_counts(sample,
+#'                                    regions,
+#'                                    range.lower = 2,
+#'                                    range.upper = 5,
+#'                                    length = FALSE,
+#'                                    transcript = TRUE,
+#'                                    experiments = )
+#'
 #' @param ribo.object S3 "ribo" class object
 #' @param regions Specific region of interest
 #' @param range.lower Lower bound of the read length
@@ -209,6 +227,39 @@ check_rc_input <- function(ribo.object,
 #' given the direct data.table to plot. Note that there is no manipulation by
 #' this function on the data.table, making this input option more error prone.
 #'
+#' @examples
+#' #ribo object use case
+#'
+#' #generate the ribo object
+#' file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+#' sample <- ribo(file.path)
+#'
+#' #specify the regions and experiments of interest
+#' regions <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
+#' experiments <- c("Hela_1", "Hela_2", "wt_1")
+#'
+#' plot_length_distribution(sample,
+#'                          region = "CDS",
+#'                          range.lower = 2,
+#'                          range.upper = 5,
+#'                          experiments = experiments,
+#'                          percentage = TRUE)
+#'
+#'
+#' #data.table use case
+#' #obtains the region counts at each individual read length, summed across every transcript
+#' region.counts <- get_region_counts(sample,
+#'                                    regions,
+#'                                    range.lower = 2,
+#'                                    range.upper = 5,
+#'                                    length = FALSE,
+#'                                    transcript = TRUE)
+#'
+#' #the param 'length' must be set to FALSE and param 'transcript' must be set
+#' #to TRUE to use a data.table
+#' plot_length_distribution(region.counts)
+#'
+#'
 #' @seealso \code{\link{get_region_counts}} to generate a data.table that can
 #' be provided as input,
 #' \code{\link{ribo}} to create a ribo.object that can be provided as input
@@ -308,6 +359,33 @@ plot_length_distribution<- function(x,
 #' The run time becomes substantially faster when \code{\link{plot_region_counts}} is given
 #' the direct data.table to plot. Note that there is no manipulation by this function on the
 #' data.table, making this input option more error prone.
+#'
+#' @examples
+#' #ribo object use case
+#' #generate the ribo object
+#' file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+#' sample <- ribo(file.path)
+#'
+#' #specify the regions and experiments of interest
+#' regions <- c("UTR5", "CDS", "UTR3")
+#' experiments <- c("Hela_1", "Hela_2", "WT_1")
+#'
+#' plot_region_counts(sample,
+#'                    range.lower = 2,
+#'                    range.upper = 5,
+#'                    experiments)
+#'
+#' #data.table use case
+#' #obtains the region counts at each individual read length, summed across every transcript
+#' region.counts <- get_region_counts(sample,
+#'                                    regions,
+#'                                    range.lower = 2,
+#'                                    range.upper = 5,
+#'                                    length = TRUE,
+#'                                    transcript = TRUE)
+#'
+#' #the params 'length' and 'transcript' must be set to true to use a data.table
+#' plot_region_counts(region.counts)
 #'
 #' @seealso \code{\link{get_region_counts}} to generate a data.table that can be provided as input,
 #' \code{\link{ribo}} to create a ribo.object that can be provided as input

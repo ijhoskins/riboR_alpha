@@ -21,9 +21,18 @@ and datasets of the ribo file.
 }
 \details{
 The \code{\link{get_info}} first provides information on the format version, left_span, right_span,
-longest read length, shortest read length, metagene_radius, and reference model. The last element of the 
+longest read length, shortest read length, metagene_radius, and reference model. The last element of the
 returned list contains the information about the presence of coverage and RNA-seq data which are
 optional datasets to include in a .ribo file.
+}
+\examples{
+#generate the ribo object
+file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+sample <- ribo(file.path)
+
+#retrieve information
+get_info(sample)
+
 }
 \seealso{
 \code{\link{ribo}} to generate the necessary ribo.object parameter

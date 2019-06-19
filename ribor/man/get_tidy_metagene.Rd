@@ -46,31 +46,27 @@ the metagene coverage count at each read length.
 }
 \examples{
 #generate the ribo object by loading in a ribo function and calling the \\code{\\link{ribo}} function
-\donttest{
-sample <- ribo("sample.ribo")
-}
-
+file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+sample <- ribo(file.path)
 
 #extract the total metagene information in a tidy format
 #for all experiments across the read lengths and transcripts
-#of the start site from read length 15 to 40
-\donttest{
+#of the start site from read length 2 to 5
+
 metagene_info <- get_tidy_metagene(ribo.object = sample,
                                    site = "start",
-                                   range.lower = 15,
-                                   range.upper = 40,
+                                   range.lower = 2,
+                                   range.upper = 5,
                                    length = TRUE,
                                    experiments = get_experiments(sample))
-}
-
 
 #Note that length and experiments in this case are the
 #default values and can be left out. The following generates the same output.
 \donttest{
 metagene_info <- get_tidy_metagene(ribo.object = sample,
                                    site = "start",
-                                   range.lower = 15,
-                                   range.upper = 40)
+                                   range.lower = 2,
+                                   range.upper = 5)
 }
 
 }

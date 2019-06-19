@@ -12,17 +12,27 @@ get_metadata(ribo.object, name)
 \item{name}{The name of the experiment}
 }
 \value{
-If the experiment is valid, a list of 4 elements providing 
-information about the cell_line, digestion_duration, digestion_enzyme, and 
+If the experiment is valid, a list of 4 elements providing
+information about the cell_line, digestion_duration, digestion_enzyme, and
 source link is returned.
 
-If the name is not found, then a list of attributes describing the root file 
+If the name is not found, then a list of attributes describing the root file
 is provided.
 }
 \description{
-\code{\link{get_metadata}} provides information on the cell_line, digestion_duration, 
+\code{\link{get_metadata}} provides information on the cell_line, digestion_duration,
 digestion_enzyme, and a website link to the source if the experiment is found in the .ribo
 file. If the experiment is not found, then the attributes of the root .ribo file is returned instead.
+}
+\examples{
+#ribo object use case
+#generate the ribo object
+file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+sample <- ribo(file.path)
+
+#the ribo file contains an experiment named 'Hela_1'
+get_metadata(sample, "Hela_1")
+
 }
 \seealso{
 \code{\link{ribo}} to generate the necessary ribo.object parameter

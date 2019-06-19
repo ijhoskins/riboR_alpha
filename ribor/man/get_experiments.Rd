@@ -16,14 +16,23 @@ A list of the experiment names
 The function \code{\link{get_experiments}} provides a list of experiment names in the .ribo file.
 }
 \details{
-\code{\link{get_experiments}} returns a list of strings denoting the experiments. It obtains this 
+\code{\link{get_experiments}} returns a list of strings denoting the experiments. It obtains this
 by reading directly from the .ribo file through the handle of the 'ribo.object' parameter. To generate
 the param 'ribo.object', call the \code{\link{ribo}} function and provide the path to the .ribo file of interest.
 
 The user can then choose to create a subset from this list for any specific experiments of interest
-for later function calls. Many functions that have the param 'experiment.list' 
- call \code{\link{get_experiments}} to generate a default list of all experiments in the 
+for later function calls. Many functions that have the param 'experiment.list'
+ call \code{\link{get_experiments}} to generate a default list of all experiments in the
 .ribo file.
+}
+\examples{
+#generate the ribo object
+file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+sample <- ribo(file.path)
+
+#get a list of the experiments
+get_experiments(sample)
+
 }
 \seealso{
 \code{\link{ribo}} to generate the necessary ribo.object parameter
