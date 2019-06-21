@@ -110,15 +110,15 @@ get_metadata <- function(ribo.object, name = NULL) {
   
   #check for metadata
   if ("metadata" %in% names(attribute)) {
-    result <- read_yaml(text = attribute[["metadata"]])
-    result <- data.table(info = names(result), " " = result)
+    raw.result <- read_yaml(text = attribute[["metadata"]])
+    result <- data.table(info = names(raw.result), " " = raw.result)
     
     filter <- result[result$info != "link", ]
     link <- unlist(result[result$info == "link", ][[2]])
     print(filter, row.names = FALSE)
     cat("link: \n")
     cat(link)
-    invisible(result)
+    invisible(raw.result)
   } else {
     warning("'", name, "'", " does not have metadata. Returning an empty list")
     return(list())
