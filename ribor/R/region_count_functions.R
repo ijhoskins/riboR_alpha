@@ -265,8 +265,8 @@ check_rc_input <- function(ribo.object,
 #' \code{\link{ribo}} to create a ribo.object that can be provided as input
 #' @param x either an S3 "ribo" object or a data.table
 #' @param region the region of interest
-#' @param range.lower a lower bounds for a read length range
-#' @param range.upper an upper bounds for a read length range
+#' @param range.lower  lower bound for a read length range
+#' @param range.upper upper bound for a read length range
 #' @param experiments a list of experiment names
 #' @param percentage logical value that, if TRUE, presents the data as a percentage
 #' @param title a title for the generated plot
@@ -391,8 +391,8 @@ plot_length_distribution<- function(x,
 #' \code{\link{ribo}} to create a ribo.object that can be provided as input
 #'
 #' @param x either an S3 "ribo" object or a data.table
-#' @param range.lower a lower bounds for a read length range
-#' @param range.upper an upper bounds for a read length range
+#' @param range.lower lower bound for a read length range
+#' @param range.upper upper bound for a read length range
 #' @param experiments a list of experiment names
 #' @param title a title for the generated plot
 #' @importFrom data.table is.data.table
