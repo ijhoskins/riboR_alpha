@@ -232,13 +232,14 @@ get_tidy_metagene <- function(ribo.object,
                          range.upper,
                          length,
                          transcript = TRUE,
-                         experiments = get_experiments(ribo.object))
+                         experiments = experiments)
 
   metagene.radius <- as.integer((ncol(result) - 2)/2)
   tidy.data <- gather(result, key = "position", value = "count", c(as.character(-metagene.radius:metagene.radius)))
   tidy.data$position <- as.integer(tidy.data$position)
   tidy.data$count    <- as.integer(tidy.data$count)
-  return(setDT(tidy.data))
+  tidy.result <- setDT(tidy.data)
+  return(tidy.result)
 }
 
 

@@ -265,8 +265,8 @@ check_rc_input <- function(ribo.object,
 #' \code{\link{ribo}} to create a ribo.object that can be provided as input
 #' @param x either an S3 "ribo" object or a data.table
 #' @param region the region of interest
-#' @param range.lower  lower bound for a read length range
-#' @param range.upper upper bound for a read length range
+#' @param range.lower a lower bounds for a read length range
+#' @param range.upper an upper bounds for a read length range
 #' @param experiments a list of experiment names
 #' @param percentage logical value that, if TRUE, presents the data as a percentage
 #' @param title a title for the generated plot
@@ -391,8 +391,8 @@ plot_length_distribution<- function(x,
 #' \code{\link{ribo}} to create a ribo.object that can be provided as input
 #'
 #' @param x either an S3 "ribo" object or a data.table
-#' @param range.lower lower bound for a read length range
-#' @param range.upper upper bound for a read length range
+#' @param range.lower a lower bounds for a read length range
+#' @param range.upper an upper bounds for a read length range
 #' @param experiments a list of experiment names
 #' @param title a title for the generated plot
 #' @importFrom data.table is.data.table
@@ -400,7 +400,7 @@ plot_length_distribution<- function(x,
 #' @importFrom tidyr gather
 #' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot geom_col theme_bw theme ggtitle coord_flip theme
-#' @importFrom ggplot2 labs scale_fill_discrete
+#' @importFrom ggplot2 labs scale_fill_discrete element_blank
 #' @export
 plot_region_counts <- function(x,
                                range.lower,
@@ -446,14 +446,16 @@ plot_region_counts <- function(x,
     left_join(all.regions, by = "experiment") -> all.regions
 
   all.regions %>%
-    mutate(fraction = .data$region.count/sum) %>%
+    mutate(percentage = 100 * .data$region.count/sum) %>%
     mutate(region = factor(.data$region, levels = c("UTR3", "CDS", "UTR5"))) %>%
     arrange(desc(.data$region)) %>%
-    ggplot(aes(x = .data$experiment, y = .data$fraction, fill = .data$region)) +
+    ggplot(aes(x = .data$experiment, y = .data$percentage, fill = .data$region)) +
     geom_col() +
     coord_flip() +
     theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5)) +
+    theme(plot.title = element_text(hjust = 0.5),
+          panel.border = element_blank(),
+          panel.grid = element_blank()) +
     scale_fill_discrete(breaks = c("UTR5", "CDS", "UTR3")) +
-    labs(title = title, x = "Experiment", y = "Fraction", fill = "Region")
+    labs(title = title, x = "Experiment", y = "Percentage", fill = "Region")
 }

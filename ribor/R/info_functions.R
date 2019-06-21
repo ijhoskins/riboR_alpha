@@ -37,59 +37,35 @@ get_info <- function(ribo.object) {
   if ("time" %in% names(result)) {
     result <- result[ -which(names(result) == "time")]
   }
-
-  #creates the separate lists for reads, coverage, rna.seq, and metadata
-  #to eventually put in a data frame
-  reads.list    <- list()
-  coverage.list <- list()
-  rna.seq.list  <- list()
-  metadata.list <- list()
-
-  #ls function provides information about the contents of each experiment
-  ls <- h5ls(handle)
-
-  #loop over all of the experiments
-  for (experiment in exp.list) {
-    #gathers information on the number of reads for each experiment by looking at
-    #the attributes
-    name           <- paste("/experiments/", experiment, sep = "")
-    attribute      <- h5readAttributes(handle, name)
-    reads.list     <- c(reads.list, attribute[["total_reads"]])
-
-
-    #creates separate logical lists to denote the presence of
-    #reads, coverage, RNA-seq, metadata
-    has.metadata   <- ("metadata" %in% names(attribute))
-    metadata.list  <- c(metadata.list, has.metadata)
-
-    group.contents <- ls[ls$group == name,]
-    group.names    <- group.contents$name
-
-    has.coverage   <- ("coverage" %in% group.names)
-    coverage.list  <- c(coverage.list, has.coverage)
-
-    has.rna.seq    <- ("rnaseq" %in% group.names)
-    rna.seq.list   <- c(rna.seq.list, has.rna.seq)
-  }
-
-  #contructs the data.table containing logical values to denote the contents
-  experiments.info       <- data.table(names    = exp.list,
-                                       reads    = reads.list,
-                                       coverage = coverage.list,
-                                       rna.seq  = rna.seq.list,
-                                       metadata = metadata.list)
-
-  experiments                   <- list(experiments.info)
-  result                        <- c(result, contents = experiments)
+  
+  experiment.info <- list(ribo.object$experiment.info)
+  result <- c(result, experiment.info = experiment.info)
   return(result)
 }
+
+print_info <- function(ribo.object) {
+  info <- get_info(ribo.object)
+  info.table <- data.table("--name--" = names(info[-length(info)]),
+                           " " = c(as.character(info[-length(info)])))
+  name.width <- max(max(sapply(info.table, nchar)), max(sapply(names(info.table), nchar)))
+  names(info.table) <- format(names(info.table), width = name.width, justify = "centre")
+  info.table <- format(info.table, width = name.width, justify = "left")
+  cat("General Info:\n")
+  print(data.table(info.table), row.names = FALSE, quote = FALSE)
+  cat("\n")
+  cat("Experiment Contents and Information:\n")
+  contents <- info[[length(info)]]
+  names(contents) <- format
+  print(info[[length(info)]], row.names = FALSE, justify = "right")
+}
+
 
 
 #' Retrieves the metadata of an experiment
 #'
-#' \code{\link{get_metadata}} provides information on the cell_line, digestion_duration,
-#' digestion_enzyme, and a website link to the source if the experiment is found in the .ribo
-#' file. If the experiment is not found, then the attributes of the root .ribo file is returned instead.
+#' \code{\link{get_metadata}} provides information on all of the user-inputted
+#' metadata of an experiment. If the experiment is not found, then the 
+#' attributes of the root .ribo file is returned instead.
 #'
 #' @param ribo.object S3 class of object ribo
 #' @param name The name of the experiment
@@ -103,9 +79,8 @@ get_info <- function(ribo.object) {
 #' get_metadata(sample, "Hela_1")
 #'
 #' @return
-#' If the experiment is valid, a list of 4 elements providing
-#' information about the cell_line, digestion_duration, digestion_enzyme, and
-#' source link is returned.
+#' If the experiment is valid, a list of elements providing all of the metadata of the  
+#' experiment.
 #'
 #' If the name is not found, then a list of attributes describing the root file
 #' is provided.
@@ -113,33 +88,43 @@ get_info <- function(ribo.object) {
 #' @importFrom rhdf5 h5readAttributes
 #' @importFrom yaml read_yaml
 #' @export
-get_metadata <- function(ribo.object, name) {
+get_metadata <- function(ribo.object, name = NULL) {
   #get_experiments also checks if ribo.object is a proper "ribo" object
   exp.list <- get_experiments(ribo.object)
   handle <- ribo.object$handle
 
-  #check if the name is in the list
-  if (!(name %in% exp.list)) {
-    warning("Experiment was not found. Returning root file attributes.")
-    attribute <- h5readAttributes(handle, "/")
-    if ("time" %in% names(result)) {
-      result <- result[ -which(names(result) == "time")]
-    }
-    return (attribute)
+  if (is.null(name)) {
+    attributes <- get_attributes(ribo.object)
+    return(data.table(attribute = names(attributes), value = attributes))
+  } else if (!(name %in% exp.list)) {
+    warning("'", name, "'", " is not a valid experiment name.",
+            " Returned value is the root ribo file attributes.",
+            call. = FALSE)
+    attributes <- get_attributes(ribo.object)
+    return(data.table(attribute = names(attributes), value = attributes))
   }
-
+  
   #create the experiment path and get its attributes
   path <- paste("experiments/", name, sep = "")
   attribute <- h5readAttributes(handle, path)
-
+  
   #check for metadata
   if ("metadata" %in% names(attribute)) {
-    read_yaml(text = attribute[["metadata"]])
+    result <- read_yaml(text = attribute[["metadata"]])
+    result <- data.table(info = names(result), " " = result)
+    
+    filter <- result[result$info != "link", ]
+    link <- unlist(result[result$info == "link", ][[2]])
+    print(filter, row.names = FALSE)
+    cat("link: \n")
+    cat(link)
+    invisible(result)
   } else {
     warning("'", name, "'", " does not have metadata. Returning an empty list")
     return(list())
   }
 }
+
 
 #' Provides a list of experiments from a .ribo file
 #'

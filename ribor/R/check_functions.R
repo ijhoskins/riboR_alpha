@@ -9,7 +9,7 @@ check_ribo <- function(ribo.object, stop = TRUE) {
 
   expected_names <- c("handle", "experiments", "format.version", "reference",
                       "length.max", "length.min", "left.span", "right.span",
-                      "length.offset", "transcript.offset", "transcript.names",
+                      "length.offset", "experiment.info", "transcript.offset", "transcript.names",
                       "transcript.lengths")
   if(!identical(names(ribo.object), expected_names) || class(ribo.object) != "ribo") {
     if (stop) {
@@ -54,13 +54,15 @@ check_experiments <- function(ribo.object, experiments) {
   # None
   ribo.experiments <- get_experiments(ribo.object)
   matched.experiments <- intersect(experiments, ribo.experiments)
-
+  
+  if (!length(matched.experiments)) {
+    stop("Param 'experiments' contained no valid experiments.", call. = FALSE)
+  }
+  
   #deals with missing experiments
-  missing <- FALSE
   check <- setdiff(matched.experiments, experiments)
   if (length(check)) {
     for (experiment in check) {
-      missing <- TRUE
       warning("'", experiment, "'", " was not found.", call. = FALSE)
     }
     warning("Param 'experiments' contained experiments that were not found.

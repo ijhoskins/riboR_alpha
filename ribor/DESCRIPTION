@@ -12,6 +12,7 @@ LazyData: true
 Depends: R (>= 3.4.0)
 biocViews:
     Software
+    Infrastructure
 Imports:
     data.table,
     dplyr,
@@ -22,5 +23,8 @@ Imports:
     tidyr,
     yaml
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 RoxygenNote: 6.1.1
+VignetteBuilder: knitr
