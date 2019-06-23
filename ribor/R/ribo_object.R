@@ -99,6 +99,17 @@ ribo <- function(name){
   return(ribo.contents)
 }
 
+#' Printing "ribo" objects 
+#' 
+#' Print a ribo object
+#' 
+#' This method retrieves any user-relevant information about the ribo object 
+#' and neatly prints it out. The information is extracted from the "ribo" class
+#' object, turned into a data.table. The entries are then converted to a character,
+#' customly formatted, and printed.
+#' 
+#' @param ribo.object object of class "ribo"
+#' @importFrom data.table as.data.table data.table
 #' @export
 print.ribo <- function(ribo.object) {
   values <- "File Information"

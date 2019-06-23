@@ -400,7 +400,7 @@ plot_length_distribution<- function(x,
 #' @importFrom tidyr gather
 #' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot geom_col theme_bw theme ggtitle coord_flip theme
-#' @importFrom ggplot2 labs scale_fill_discrete element_blank
+#' @importFrom ggplot2 labs scale_fill_discrete element_blank geom_text position_stack
 #' @export
 plot_region_counts <- function(x,
                                range.lower,
@@ -446,16 +446,22 @@ plot_region_counts <- function(x,
     left_join(all.regions, by = "experiment") -> all.regions
 
   all.regions %>%
-    mutate(percentage = 100 * .data$region.count/sum) %>%
+    mutate(percentage = round(100 * .data$region.count/sum, 1)) %>%
     mutate(region = factor(.data$region, levels = c("UTR3", "CDS", "UTR5"))) %>%
+    mutate(show = replace(.data$percentage, .data$region != "CDS", "")) %>% 
     arrange(desc(.data$region)) %>%
     ggplot(aes(x = .data$experiment, y = .data$percentage, fill = .data$region)) +
     geom_col() +
     coord_flip() +
+    geom_text(aes(x=.data$experiment, y= .data$percentage, label = .data$show),
+              position = position_stack(vjust=0.5),
+              size = 3) +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5),
           panel.border = element_blank(),
           panel.grid = element_blank()) +
     scale_fill_discrete(breaks = c("UTR5", "CDS", "UTR3")) +
     labs(title = title, x = "Experiment", y = "Percentage", fill = "Region")
+    
+
 }

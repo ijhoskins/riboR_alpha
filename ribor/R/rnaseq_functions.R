@@ -82,9 +82,9 @@ get_rnaseq <- function(ribo.object,
 
 check_rnaseq <- function(ribo.object, experiments) {
   #obtain the rnaseq data
-  rnaseq <- get_info(ribo.object)[["contents"]][, c("names", "rna.seq")]
-  has.rnaseq <- rnaseq[rnaseq$rna.seq == TRUE, ]
-  has.rnaseq <- has.rnaseq$names
+  table <- ribo.object$experiment.info
+  has.rnaseq <- table[table$rna.seq == TRUE, ]
+  has.rnaseq <- has.rnaseq$experiment
   check_experiments(ribo.object, experiments)
 
   #find the experiments in the experiment.list that do not have coverage and print warnings

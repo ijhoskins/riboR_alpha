@@ -143,9 +143,9 @@ check_coverage <- function(ribo.object, experiments) {
   # A list of experiments in the ribo.object that have coverage data
 
   #obtain the coverage data
-  table <- get_info(ribo.object)[["contents"]][, c("names", "coverage")]
+  table <- ribo.object$experiment.info
   has.coverage <- table[table$coverage == TRUE, ]
-  has.coverage <- has.coverage$names
+  has.coverage <- has.coverage$experiment
 
   #find the experiments in the experiment.list that do not have coverage and print warnings
   check <- setdiff(experiments, has.coverage)

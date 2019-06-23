@@ -33,9 +33,6 @@ test_that("get_info- checks first seven elements",
            expect_equal(as.character(unnamed.actual),
                         as.character(properties)))
 
-test_that("get_info- checks last datatable element",
-           expect_equal(actual[[8]], expected.table))
-
 
 #test get_rnaseq
 abundance.list  <- c(2.89, 15.46, 8.0, 6.42, 1.37, 0.06, 2.89, 15.46, 8.0)
