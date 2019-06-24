@@ -63,3 +63,22 @@ The data table would just present the entire stored raw data
 from the read length 'range.lower' to the read length 'range.upper' which in most
 cases would result in a slow run time with a massive data.table returned.
 }
+\examples{
+#generate the ribo object
+file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+sample <- ribo(file.path)
+
+#specify the regions and experiments of interest
+regions <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
+experiments <- c("Hela_1", "Hela_2", "WT_1")
+
+#obtains the region counts at each individual read length, summed across every transcript
+region.counts <- get_region_counts(sample,
+                                   regions,
+                                   range.lower = 2,
+                                   range.upper = 5,
+                                   length = FALSE,
+                                   transcript = TRUE,
+                                   experiments = )
+
+}

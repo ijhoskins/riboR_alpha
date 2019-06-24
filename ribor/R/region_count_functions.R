@@ -35,6 +35,24 @@
 #' from the read length 'range.lower' to the read length 'range.upper' which in most
 #' cases would result in a slow run time with a massive data.table returned.
 #'
+#' @examples
+#' #generate the ribo object
+#' file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+#' sample <- ribo(file.path)
+#'
+#' #specify the regions and experiments of interest
+#' regions <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
+#' experiments <- c("Hela_1", "Hela_2", "WT_1")
+#'
+#' #obtains the region counts at each individual read length, summed across every transcript
+#' region.counts <- get_region_counts(sample,
+#'                                    regions,
+#'                                    range.lower = 2,
+#'                                    range.upper = 5,
+#'                                    length = FALSE,
+#'                                    transcript = TRUE,
+#'                                    experiments = )
+#'
 #' @param ribo.object S3 "ribo" class object
 #' @param regions Specific region of interest
 #' @param range.lower Lower bound of the read length
@@ -209,6 +227,39 @@ check_rc_input <- function(ribo.object,
 #' given the direct data.table to plot. Note that there is no manipulation by
 #' this function on the data.table, making this input option more error prone.
 #'
+#' @examples
+#' #ribo object use case
+#'
+#' #generate the ribo object
+#' file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+#' sample <- ribo(file.path)
+#'
+#' #specify the regions and experiments of interest
+#' regions <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
+#' experiments <- c("Hela_1", "Hela_2", "wt_1")
+#'
+#' plot_length_distribution(sample,
+#'                          region = "CDS",
+#'                          range.lower = 2,
+#'                          range.upper = 5,
+#'                          experiments = experiments,
+#'                          percentage = TRUE)
+#'
+#'
+#' #data.table use case
+#' #obtains the region counts at each individual read length, summed across every transcript
+#' region.counts <- get_region_counts(sample,
+#'                                    regions,
+#'                                    range.lower = 2,
+#'                                    range.upper = 5,
+#'                                    length = FALSE,
+#'                                    transcript = TRUE)
+#'
+#' #the param 'length' must be set to FALSE and param 'transcript' must be set
+#' #to TRUE to use a data.table
+#' plot_length_distribution(region.counts)
+#'
+#'
 #' @seealso \code{\link{get_region_counts}} to generate a data.table that can
 #' be provided as input,
 #' \code{\link{ribo}} to create a ribo.object that can be provided as input
@@ -309,6 +360,33 @@ plot_length_distribution<- function(x,
 #' the direct data.table to plot. Note that there is no manipulation by this function on the
 #' data.table, making this input option more error prone.
 #'
+#' @examples
+#' #ribo object use case
+#' #generate the ribo object
+#' file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+#' sample <- ribo(file.path)
+#'
+#' #specify the regions and experiments of interest
+#' regions <- c("UTR5", "CDS", "UTR3")
+#' experiments <- c("Hela_1", "Hela_2", "WT_1")
+#'
+#' plot_region_counts(sample,
+#'                    range.lower = 2,
+#'                    range.upper = 5,
+#'                    experiments)
+#'
+#' #data.table use case
+#' #obtains the region counts at each individual read length, summed across every transcript
+#' region.counts <- get_region_counts(sample,
+#'                                    regions,
+#'                                    range.lower = 2,
+#'                                    range.upper = 5,
+#'                                    length = TRUE,
+#'                                    transcript = TRUE)
+#'
+#' #the params 'length' and 'transcript' must be set to true to use a data.table
+#' plot_region_counts(region.counts)
+#'
 #' @seealso \code{\link{get_region_counts}} to generate a data.table that can be provided as input,
 #' \code{\link{ribo}} to create a ribo.object that can be provided as input
 #'
@@ -322,7 +400,7 @@ plot_length_distribution<- function(x,
 #' @importFrom tidyr gather
 #' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot geom_col theme_bw theme ggtitle coord_flip theme
-#' @importFrom ggplot2 labs scale_fill_discrete
+#' @importFrom ggplot2 labs scale_fill_discrete element_blank geom_text position_stack
 #' @export
 plot_region_counts <- function(x,
                                range.lower,
@@ -368,14 +446,22 @@ plot_region_counts <- function(x,
     left_join(all.regions, by = "experiment") -> all.regions
 
   all.regions %>%
-    mutate(fraction = .data$region.count/sum) %>%
+    mutate(percentage = round(100 * .data$region.count/sum, 1)) %>%
     mutate(region = factor(.data$region, levels = c("UTR3", "CDS", "UTR5"))) %>%
+    mutate(show = replace(.data$percentage, .data$region != "CDS", "")) %>% 
     arrange(desc(.data$region)) %>%
-    ggplot(aes(x = .data$experiment, y = .data$fraction, fill = .data$region)) +
+    ggplot(aes(x = .data$experiment, y = .data$percentage, fill = .data$region)) +
     geom_col() +
     coord_flip() +
+    geom_text(aes(x=.data$experiment, y= .data$percentage, label = .data$show),
+              position = position_stack(vjust=0.5),
+              size = 3) +
     theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5)) +
+    theme(plot.title = element_text(hjust = 0.5),
+          panel.border = element_blank(),
+          panel.grid = element_blank()) +
     scale_fill_discrete(breaks = c("UTR5", "CDS", "UTR3")) +
-    labs(title = title, x = "Experiment", y = "Fraction", fill = "Region")
+    labs(title = title, x = "Experiment", y = "Percentage", fill = "Region")
+    
+
 }

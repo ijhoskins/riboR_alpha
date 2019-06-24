@@ -4,20 +4,35 @@
 #' data over the length of a given transcript.
 #'
 #' The function \code{\link{get_coverage}} first checks the experiments in the
-#' 'experiment.list' parameter to see if they are present in the .ribo file. 
+#' 'experiment.list' parameter to see if they are present in the .ribo file.
 #' It will then check these experiments for coverage data which is an optional
-#' dataset. The function checks the coverage of one transcript at a time at 
-#' each read length from 'range.lower' to 'range.upper', inclusive. However, 
-#' the parameter 'transcript' allows the user to obtain the coverage 
-#' information of a transcript across the range of read lengths indicated by 
+#' dataset. The function checks the coverage of one transcript at a time at
+#' each read length from 'range.lower' to 'range.upper', inclusive. However,
+#' the parameter 'length' allows the user to obtain the coverage
+#' information of a transcript across the range of read lengths indicated by
 #' 'range.lower' and 'range.upper'.
-#' 
+#' @examples
+#' #generate the ribo object
+#' file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+#' sample <- ribo(file.path)
+#'
+#' #get the experiments of interest that also contain coverage data
+#' experiments <- c("Hela_1", "Hela_2", "Hela_3", "WT_1")
+#'
+#' #the ribo file contains a transcript named 'MYC'
+#' coverage.data <- get_coverage(ribo.object = sample,
+#'                               name = "MYC",
+#'                               range.lower = 2,
+#'                               range.upper = 5,
+#'                               length = TRUE,
+#'                               experiments = experiments)
+#'
 #' @param ribo.object S3 "ribo" class object
 #' @param name Name of the transcript
 #' @param range.lower Lower bound of the read length
 #' @param range.upper Upper bound of the read length
-#' @param transcript Logical value that denotes if the coverage should be summed across read lengths
-#' @param experiments List of experiments to obtain coverage information on 
+#' @param length Logical value that denotes if the coverage should be summed across read lengths
+#' @param experiments List of experiments to obtain coverage information on
 #' @return A data table containing the coverage data
 #' @seealso \code{\link{ribo}} to generate the necessary ribo.object parameter
 #' @importFrom rhdf5 h5read
@@ -26,7 +41,7 @@ get_coverage <- function(ribo.object,
                          name,
                          range.lower,
                          range.upper,
-                         transcript = TRUE,
+                         length = TRUE,
                          experiments = get_experiments(ribo.object)) {
   #perform checks on the parameters
   check_lengths(ribo.object, range.lower, range.upper)
@@ -48,7 +63,7 @@ get_coverage <- function(ribo.object,
 
   #create matrix of correct size based on param transcript
   result <- matrix()
-  if (transcript) {
+  if (length) {
     result <- matrix(0L,
                      nrow = 1 * total.experiments,
                      ncol = transcript.length)
@@ -72,8 +87,9 @@ get_coverage <- function(ribo.object,
       coverage<- t(h5read(ribo.object$handle,
                           path,
                           index = list(coverage.start:coverage.stop)))
+      coverage <- as.integer(coverage)
       # compute the correct offset to store the coverage information in each case
-      if (transcript) {
+      if (length) {
         result[i, ] <- result[i, ] + coverage
       } else {
         current.experiment      <- (i - 1) * read.range
@@ -83,7 +99,7 @@ get_coverage <- function(ribo.object,
       }
     }
   }
-  return(create_datatable(transcript,
+  return(create_datatable(length,
                           range.lower,
                           range.upper,
                           matched.experiments,
@@ -91,7 +107,7 @@ get_coverage <- function(ribo.object,
 }
 
 
-create_datatable <- function (transcript,
+create_datatable <- function (length,
                               range.lower,
                               range.upper,
                               matched.experiments,
@@ -103,7 +119,7 @@ create_datatable <- function (transcript,
   # Data table that wraps the matrix with the correct and appropriate labels
 
   matched.size <- length(matched.experiments)
-  if (transcript) {
+  if (length) {
     return (data.table(experiment = matched.experiments,
                        matrix))
   }
@@ -127,9 +143,9 @@ check_coverage <- function(ribo.object, experiments) {
   # A list of experiments in the ribo.object that have coverage data
 
   #obtain the coverage data
-  table <- get_info(ribo.object)[["contents"]][, c("names", "coverage")]
+  table <- ribo.object$experiment.info
   has.coverage <- table[table$coverage == TRUE, ]
-  has.coverage <- has.coverage$names
+  has.coverage <- has.coverage$experiment
 
   #find the experiments in the experiment.list that do not have coverage and print warnings
   check <- setdiff(experiments, has.coverage)

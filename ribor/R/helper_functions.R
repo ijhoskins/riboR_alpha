@@ -8,8 +8,10 @@ get_reference_names <- function(ribo.object){
 get_reference_lengths <- function(ribo.object){
   # Retrieves the reference transcript lengths 
   check_ribo(ribo.object)
-  row.names <- h5read(ribo.object$handle&'reference', name = "reference_names")
-  lengths   <- h5read(ribo.object$handle&'reference', name = "reference_lengths")
+  row.names <- h5read(ribo.object$handle&'reference', 
+                      name = "reference_names")
+  lengths   <- h5read(ribo.object$handle&'reference', 
+                      name = "reference_lengths")
   return(data.table(transcript = row.names, length = lengths))
 }
 
@@ -17,7 +19,6 @@ get_reference_lengths <- function(ribo.object){
 get_attributes <- function(ribo.object) {
   # Retrieves the attributes of the ribo.object 
   handle  <- ribo.object$handle
-  result  <- list()
   result  <- h5readAttributes(handle, "/")
 
   #time does not serve much use

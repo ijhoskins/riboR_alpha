@@ -1,6 +1,6 @@
 Package: ribor
 Title: An R Interface for Ribo Files 
-Version: 0.0.0.9000
+Version: 0.99.0
 Authors@R: c(
     person("Michael", "Geng", email = "michaelgeng@utexas.edu", role = "cre"),
     person("Hakan", "Ozadam", email = "hakan.ozadam@gmail.com", role = "aut"),
@@ -11,14 +11,20 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.4.0)
 biocViews:
+    Software
+    Infrastructure
 Imports:
     data.table,
     dplyr,
     ggplot2,
     rhdf5,
     rlang,
+    stats,
     tidyr,
     yaml
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 RoxygenNote: 6.1.1
+VignetteBuilder: knitr

@@ -37,54 +37,44 @@ to the \code{\link{get_metagene}} function.
 This function uses ggplot in its underlying implementation.
 }
 \examples{
-#a common use case is to directly pass in the ribo object file as param 'x'
-#generate the ribo object by loading in a ribo function and calling the
-#\\code{\\link{ribo}} function
-\donttest{
-sample <- ribo("sample.ribo")
-}
+#a potential use case is to directly pass in the ribo object file as param 'x'
 
+#generate the ribo object to directly use
+file.path <- system.file("extdata", "sample.ribo", package = "ribor")
+sample <- ribo(file.path)
 
-#assuming sample contains the following experiments
-\donttest{
-experiments <- c("HeLa_1", "HeLa_2", "HeLa_3")
-}
-
+#specify experiments of interest
+experiments <- c("HeLa_1", "HeLa_2", "WT_1")
 
 #plot the metagene start site coverage for all experiments in 'sample.ribo'
-#from read length 15 to 40
-\donttest{
+#from read length 2 to 5
 plot_metagene(x = sample,
               site = "start",
-              range.lower = 15,
-              range.upper = 40,
+              range.lower = 2,
+              range.upper = 5,
               experiments = experiments)
-}
-
 
 #Note that the site, range.lower, range.upper, and experiments are only
 #necessary if a ribo object is being passed in as param 'x'. If a ribo
 #object is passed in, then the param 'experiments' will be set to all of
 #the experiments by default.
 
-#If a data.table is passed in, then the \\code{\\link{plot_metagene}} function
+#If a data.table is passed in, then the plot_metagene function
 #does not need any other information. All of the elements of the data.table
 #will be used, assuming that it contains the same column names and number of
-#columns as the output from \\code{\\link{get_tidy_metagene}}
+#columns as the output from get_tidy_metagene()
 
-#gets the metagene start site coverage from read length 15 to 40
+#gets the metagene start site coverage from read length 2 to 5
 #note that the data must be summed across transcripts and read lengths
 #for the plot_metagene function
-\donttest{
 data <- get_tidy_metagene(sample,
                           site = "start",
-                          range.lower = 15,
-                          range.upper = 40)
-}
+                          range.lower = 2,
+                          range.upper = 5)
 
-\donttest{
+#plot the metagene data
 plot_metagene(data)
-}
+
 
 
 }
