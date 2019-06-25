@@ -7,7 +7,7 @@
 get_metadata(ribo.object, name = NULL)
 }
 \arguments{
-\item{ribo.object}{S3 class of object ribo}
+\item{ribo.object}{object of class 'ribo'}
 
 \item{name}{The name of the experiment}
 }
@@ -15,8 +15,8 @@ get_metadata(ribo.object, name = NULL)
 If the experiment is valid, a list of elements providing all of the metadata of the  
 experiment.
 
-If the name is not found, then a list of attributes describing the root file
-is provided.
+If the name is not provided or not found, then a list of attributes 
+describing the root file is provided.
 }
 \description{
 \code{\link{get_metadata}} provides information on all of the user-inputted

@@ -89,7 +89,7 @@ tidy_meta_1 <- get_tidy_metagene(ribo.object,
                                  3,
                                  length = TRUE)
 actual   <- c(nrow(tidy_meta_1), ncol(tidy_meta_1)) 
-expected <- c(25, 3)
+expected <- c(25, 4)
 
 test_that("get_metagene- size",
           expect_equal(actual, expected))
@@ -111,7 +111,7 @@ tidy_meta_2 <- get_tidy_metagene(ribo.object,
                                  3,
                                  length = FALSE)
 actual <- c(nrow(tidy_meta_2), ncol(tidy_meta_2))
-expected <- c(50, 4)
+expected <- c(50, 5)
 
 test_that("get_metagene- size",
           expect_equal(actual, 

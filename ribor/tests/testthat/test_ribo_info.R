@@ -57,18 +57,18 @@ hela.no.match <- c("Hela_3", "Hela_4")
 
 
 #test get_metadata
-hela.meta <- list("HeLa", "5 min", "HindIII", "https://www.encodeproject.org/")
+hela.meta <- c("HeLa", "5 min", "HindIII", "https://www.encodeproject.org/")
 
-wt.meta <- list("WT", "5 min", "HindIII", "https://www.encodeproject.org/")
+wt.meta <- c("WT", "5 min", "HindIII", "https://www.encodeproject.org/")
 
 actual.hela.meta <- get_metadata(ribo.object, "Hela_1")
-unname(actual.hela.meta)
+actual.hela.meta <- unname(actual.hela.meta)
 
 test_that("get_metadata- checks correct input for Hela_1",
           expect_equal(as.character(actual.hela.meta), as.character(hela.meta)))
 
 actual.wt.meta <- get_metadata(ribo.object, "WT_1")
-unname(actual.wt.meta)
+actual.wt.meta <- unname(actual.wt.meta)
 
 test_that("get_metadata- checks correct input for WT_1",
           expect_equal(as.character(actual.wt.meta), as.character(wt.meta)))

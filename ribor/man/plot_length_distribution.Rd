@@ -23,7 +23,7 @@ plot_length_distribution(x, region, range.lower, range.upper, experiments,
 \item{title}{a title for the generated plot}
 }
 \description{
-The function \code{\link{plot_region_counts}} can take either a data.table
+The function \code{\link{plot_length_distribution}} can take either a data.table
 or a "ribo" object to generate a line graph of the length distributions from
 range.lower to range.upper.
 }

@@ -4,14 +4,12 @@
 \alias{get_region_counts}
 \title{Retrieves the region counts from a .ribo file}
 \usage{
-get_region_counts(ribo.object, regions, range.lower, range.upper,
-  length = TRUE, transcript = TRUE,
-  experiments = get_experiments(ribo.object))
+get_region_counts(ribo.object, range.lower, range.upper, length = TRUE,
+  transcript = TRUE, regions = c("UTR5", "UTR5J", "CDS", "UTR3J",
+  "UTR3"), experiments = get_experiments(ribo.object))
 }
 \arguments{
 \item{ribo.object}{S3 "ribo" class object}
-
-\item{regions}{Specific region of interest}
 
 \item{range.lower}{Lower bound of the read length}
 
@@ -20,6 +18,8 @@ get_region_counts(ribo.object, regions, range.lower, range.upper,
 \item{length}{Option to condense the read lengths together, preserve the transcripts}
 
 \item{transcript}{Option to condense the transcripts together, preserve the read lengths}
+
+\item{regions}{Specific region of interest}
 
 \item{experiments}{List of experiment names}
 }

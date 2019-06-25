@@ -233,13 +233,14 @@ get_tidy_metagene <- function(ribo.object,
                          length,
                          transcript = TRUE,
                          experiments = experiments)
-
   metagene.radius <- as.integer((ncol(result) - 2)/2)
   tidy.data <- gather(result, key = "position", value = "count", c(as.character(-metagene.radius:metagene.radius)))
   tidy.data$position <- as.integer(tidy.data$position)
   tidy.data$count    <- as.integer(tidy.data$count)
-  tidy.result <- setDT(tidy.data)
-  return(tidy.result)
+  tidy.data %>% 
+    left_join(ribo.object$experiment.info[, c("experiment", "total.reads")],
+              by = "experiment") -> tidy.result
+  return(setDT(tidy.result))
 }
 
 
@@ -284,7 +285,9 @@ check_metagene_input <- function(ribo.object,
 #' @param range.lower lower bound of the read length, inclusive
 #' @param range.upper upper bound of the read length, inclusive
 #' @param experiments list of experiments
+#' @param normalize When TRUE, normalizes the data by the total reads.
 #' @param title title of the generated plot
+#' @param tick x-axis labeling increment
 #' @examples
 #' #a potential use case is to directly pass in the ribo object file as param 'x'
 #'
@@ -327,18 +330,22 @@ check_metagene_input <- function(ribo.object,
 #'
 #'
 #' @importFrom data.table is.data.table
-#' @importFrom tidyr gather
+#' @importFrom dplyr left_join mutate
 #' @importFrom ggplot2 ggplot geom_line theme_bw ggtitle aes
-#' @importFrom ggplot2 element_text theme labs
+#' @importFrom ggplot2 element_text theme labs scale_x_continuous
+#' @importFrom rlang .data sym
+#' @importFrom tidyr gather
 #' @export
 plot_metagene <- function(x,
                           site,
                           range.lower,
                           range.upper,
                           experiments,
-                          title = "Metagene Site Coverage") {
+                          normalize = FALSE,
+                          title = "Metagene Site Coverage",
+                          tick = 10) {
   is.ribo <- check_ribo(x, stop = FALSE)
-
+  
   #x is a ribo object
   if (is.ribo) {
     missing.ranges <- missing(range.lower) || missing(range.upper)
@@ -357,7 +364,7 @@ plot_metagene <- function(x,
                            experiments = experiments)
   } else if (is.data.table(x)){
     metagene.radius <- (ncol(x) - 2)/2
-    col.names       <- c("experiment", "position", "count")
+    col.names       <- c("experiment", "position", "count", "total.reads")
 
     mismatch <- !all(names(x) == col.names) || (typeof(x[[1]]) != "character")
     col <- 2
@@ -371,13 +378,25 @@ plot_metagene <- function(x,
   } else { #not a data table
     stop("Please make sure that param 'x' is either a data.table or a ribo object.")
   }
+  
+  y.value <- sym("count")
+  y.label <- "Count"
+  if (normalize) {
+    x %>%
+      mutate(normalize = (.data$count/.data$total.reads) * 1000) -> x
+    y.value <- sym("normalize")
+    y.label <- "Normalized Count"
+  }
+  
+  metagene.radius <- max(x$position)
 
   ggplot(x,
          aes(x     = .data$position,
-             y     = .data$count,
+             y     = !!y.value,
              color = .data$experiment)) +
+    scale_x_continuous(breaks = seq(-metagene.radius, metagene.radius, tick)) +
     geom_line() +
     theme_bw() +
     theme(plot.title = element_text(hjust = 0.5)) +
-    labs(title = title, x = "Position", y = "Count", color = "Experiment")
+    labs(title = title, x = "Position", y = y.label, color = "Experiment")
 }

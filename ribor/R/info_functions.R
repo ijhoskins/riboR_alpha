@@ -67,7 +67,7 @@ print_info <- function(ribo.object) {
 #' metadata of an experiment. If the experiment is not found, then the 
 #' attributes of the root .ribo file is returned instead.
 #'
-#' @param ribo.object S3 class of object ribo
+#' @param ribo.object object of class 'ribo'
 #' @param name The name of the experiment
 #' @examples
 #' #ribo object use case
@@ -82,27 +82,29 @@ print_info <- function(ribo.object) {
 #' If the experiment is valid, a list of elements providing all of the metadata of the  
 #' experiment.
 #'
-#' If the name is not found, then a list of attributes describing the root file
-#' is provided.
+#' If the name is not provided or not found, then a list of attributes 
+#' describing the root file is provided.
+#' 
 #' @seealso \code{\link{ribo}} to generate the necessary ribo.object parameter
 #' @importFrom rhdf5 h5readAttributes
-#' @importFrom yaml read_yaml
+#' @importFrom yaml read_yaml yaml.load
 #' @export
 get_metadata <- function(ribo.object, name = NULL) {
-  #get_experiments also checks if ribo.object is a proper "ribo" object
   exp.list <- get_experiments(ribo.object)
-  handle <- ribo.object$handle
-
   if (is.null(name)) {
     attributes <- get_attributes(ribo.object)
-    return(data.table(attribute = names(attributes), value = attributes))
+    return(attributes)
   } else if (!(name %in% exp.list)) {
     warning("'", name, "'", " is not a valid experiment name.",
             " Returned value is the root ribo file attributes.",
             call. = FALSE)
     attributes <- get_attributes(ribo.object)
-    return(data.table(attribute = names(attributes), value = attributes))
+    result <- data.table(attribute = names(attributes), value = attributes)
+    return(result)
   }
+  
+  #get_experiments also checks if ribo.object is a proper "ribo" object
+  handle <- ribo.object$handle
   
   #create the experiment path and get its attributes
   path <- paste("experiments/", name, sep = "")
@@ -110,15 +112,7 @@ get_metadata <- function(ribo.object, name = NULL) {
   
   #check for metadata
   if ("metadata" %in% names(attribute)) {
-    raw.result <- read_yaml(text = attribute[["metadata"]])
-    result <- data.table(info = names(raw.result), " " = raw.result)
-    
-    filter <- result[result$info != "link", ]
-    link <- unlist(result[result$info == "link", ][[2]])
-    print(filter, row.names = FALSE)
-    cat("link: \n")
-    cat(link)
-    invisible(raw.result)
+    return(yaml.load(string = attribute[["metadata"]]))
   } else {
     warning("'", name, "'", " does not have metadata. Returning an empty list")
     return(list())

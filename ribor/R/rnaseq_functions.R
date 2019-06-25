@@ -81,19 +81,21 @@ get_rnaseq <- function(ribo.object,
 }
 
 check_rnaseq <- function(ribo.object, experiments) {
-  #obtain the rnaseq data
-  table <- ribo.object$experiment.info
-  has.rnaseq <- table[table$rna.seq == TRUE, ]
-  has.rnaseq <- has.rnaseq$experiment
+  #check the experiments for validity and RNA-seq presence
   check_experiments(ribo.object, experiments)
-
+  
+  #obtain the rnaseq data
+  handle <- ribo.object$handle
+  table <- get_content_info(handle)
+  has.rnaseq <- table[table$rna.seq == TRUE, ]$experiment
+  
   #find the experiments in the experiment.list that do not have coverage and print warnings
   check <- setdiff(experiments, has.rnaseq)
   if (length(check)) {
     for (experiment in check) {
       warning("'", experiment, "'", " did not have RNA-Seq data.", call. = FALSE)
     }
-    warning("Param experiments contains experiments that did not have RNA-Seq data.
+    warning("Param 'experiments' contains experiments that did not have RNA-Seq data.
             The return value ignores these experiments.", call. = FALSE)
   }
   return(intersect(experiments, has.rnaseq))

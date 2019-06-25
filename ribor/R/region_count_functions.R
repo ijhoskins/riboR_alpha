@@ -65,11 +65,11 @@
 #' @importFrom data.table data.table
 #' @export
 get_region_counts <- function(ribo.object,
-                              regions,
                               range.lower,
                               range.upper,
                               length = TRUE,
                               transcript = TRUE,
+                              regions = c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3"),
                               experiments = get_experiments(ribo.object)) {
   if (typeof(regions) == 'character') {
     regions <- toupper(as.vector(regions))
@@ -204,7 +204,7 @@ check_rc_input <- function(ribo.object,
 
 #' Plots the length distribution
 #'
-#' The function \code{\link{plot_region_counts}} can take either a data.table
+#' The function \code{\link{plot_length_distribution}} can take either a data.table
 #' or a "ribo" object to generate a line graph of the length distributions from
 #' range.lower to range.upper.
 #'
@@ -274,9 +274,8 @@ check_rc_input <- function(ribo.object,
 #' @importFrom tidyr gather
 #' @importFrom dplyr select
 #' @importFrom ggplot2 ggplot geom_line theme_bw theme labs
-#' @importFrom rlang sym
 #' @importFrom stats aggregate
-#' @importFrom rlang .data
+#' @importFrom rlang .data sym
 #' @export
 plot_length_distribution<- function(x,
                                     region,
@@ -301,9 +300,9 @@ plot_length_distribution<- function(x,
     }
 
     x <- get_region_counts(x,
-                           region,
-                           range.lower,
-                           range.upper,
+                           range.lower = range.lower,
+                           range.upper = range.upper,
+                           regions = region,
                            length = FALSE,
                            transcript = TRUE,
                            experiments = experiments)
@@ -418,9 +417,9 @@ plot_region_counts <- function(x,
     }
     check_lengths(x, range.lower, range.upper)
     all.regions <- get_region_counts(x,
-                                     regions,
-                                     range.lower,
-                                     range.upper,
+                                     regions = regions,
+                                     range.lower = range.lower,
+                                     range.upper = range.upper,
                                      length = TRUE,
                                      transcript = TRUE,
                                      experiments = experiments)
@@ -462,6 +461,4 @@ plot_region_counts <- function(x,
           panel.grid = element_blank()) +
     scale_fill_discrete(breaks = c("UTR5", "CDS", "UTR3")) +
     labs(title = title, x = "Experiment", y = "Percentage", fill = "Region")
-    
-
 }

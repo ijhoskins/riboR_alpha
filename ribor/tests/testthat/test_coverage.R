@@ -7,13 +7,13 @@ cov_1   <- get_coverage(ribo.object,
                         name = "MYC",
                         range.lower = 2,
                         range.upper = 5,
-                        experiments = c("Hela_1"))
+                        experiments = "Hela_1")
 
 cov_2   <- get_coverage(ribo.object,
                         name = "VEGFA",
                         range.lower = 2,
                         range.upper = 5,
-                        experiments = c("Hela_1"))
+                        experiments = "Hela_1")
 
 cov_3   <- get_coverage(ribo.object,
                         name = "GAPDH",

@@ -1,7 +1,6 @@
 ---
 title: "ribor - R interface for .ribo files"
 author: "Michael Geng"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{ribor - R interface for .ribo files}
@@ -15,10 +14,9 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-
 ```{r global_options, include=FALSE}
 library(knitr)
-library(ribor)
+opts_chunk$set(fig.align = "center", fig.height = 5, fig.width = 6)
 ```
 
 # Introduction
@@ -29,12 +27,12 @@ offers a suite of reading functions for each dataset and its respective
 metadata. Additionally, there are a few plotting functions that make use of 
 the retrieved data.
 
-Many of the functions use the `r Biocpkg("rhdf5")` package which is an 
-interface for HDF5 in the **R** environment. This package makes use of data 
-slicing,the act of accessing only a small subset of data at a time without 
-reading in the entire dataset.
+Many of the functions use the "rhdf5" package which is an  interface for 
+HDF5 in the **R** environment. This package makes use of data slicing, the act
+of accessing only a small subset of data at a time without reading in the 
+entire dataset, and this functionality allows for faster reading times.
 
-# Installation of the HDF5 package 
+# Installation of the ribor package 
 
 # Getting Started 
 
@@ -68,6 +66,6 @@ Then, we may want to look at a list of experiment names, and then maybe look at 
 #retrieves the experiments
 get_info(ribo.object = sample)
 
-#get_metadata(ribo.object = sample,
-#             "Hela_1")
+get_metadata(ribo.object = sample,
+             "Hela_1")
 ```

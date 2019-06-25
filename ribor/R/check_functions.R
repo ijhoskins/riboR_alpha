@@ -9,15 +9,12 @@ check_ribo <- function(ribo.object, stop = TRUE) {
 
   expected_names <- c("handle", "experiments", "format.version", "reference",
                       "length.max", "length.min", "left.span", "right.span",
-                      "length.offset", "experiment.info", "transcript.offset", "transcript.names",
-                      "transcript.lengths")
-  if(!identical(names(ribo.object), expected_names) || class(ribo.object) != "ribo") {
-    if (stop) {
+                      "length.offset", "experiment.info", "transcript.info")
+  is.ribo <- identical(names(ribo.object), expected_names) && class(ribo.object) == "ribo"
+  if (stop && !is.ribo) {
       stop("Param ribo.object should be of class ribo.", call. = FALSE)
-    }
-    return(FALSE)
   }
-  return(TRUE)
+  return(is.ribo)
 }
 
 check_lengths <- function(ribo.object, range.lower, range.upper) {

@@ -50,17 +50,18 @@ get_coverage <- function(ribo.object,
 
   #generate list of experiments also present in the ribo file that have coverage data
   filter.experiments  <- intersect(experiments, ribo.experiments)
-  coverage.list       <- check_coverage(ribo.object, filter.experiments)
-  matched.experiments <- intersect(filter.experiments, coverage.list)
+  matched.experiments <- check_coverage(ribo.object, filter.experiments)
+  matched.experiments <- intersect(matched.experiments, filter.experiments)
   total.experiments   <- length(matched.experiments)
-
+  
+  
   #generate offsets
-  current.offset      <- ribo.object$transcript.offset[[name]]
+  info <- ribo.object$transcript.info[[name]]
+  current.offset      <- info[['offset']]
+  transcript.length   <- info[['length']]
   length.offset       <- ribo.object$length.offset
-  transcript.length   <- ribo.object$transcript.lengths[name]
   min.length          <- get_read_lengths(ribo.object)[1]
   read.range          <- range.upper - range.lower + 1
-
   #create matrix of correct size based on param transcript
   result <- matrix()
   if (length) {
@@ -142,8 +143,9 @@ check_coverage <- function(ribo.object, experiments) {
   # Returns:
   # A list of experiments in the ribo.object that have coverage data
 
+  handle <- ribo.object$handle
   #obtain the coverage data
-  table <- ribo.object$experiment.info
+  table <- get_content_info(handle)
   has.coverage <- table[table$coverage == TRUE, ]
   has.coverage <- has.coverage$experiment
 
@@ -151,10 +153,10 @@ check_coverage <- function(ribo.object, experiments) {
   check <- setdiff(experiments, has.coverage)
   if (length(check)) {
     for (experiment in check) {
-      warning("'", experiment, "'", " did not have coverage data.")
+      warning("'", experiment, "'", " did not have coverage data.", call. = FALSE)
     }
-    warning("Param experiment.list contains experiments that did not have coverage data.
-            The return value ignores these experiments.")
+    warning("Param 'experiments' contains experiment names that did not have coverage data.
+            The return value ignores these experiments.", call. = FALSE)
   }
 
   #return a list of experiments with coverage

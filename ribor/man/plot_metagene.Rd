@@ -5,7 +5,7 @@
 \title{Plots the metagene coverage data}
 \usage{
 plot_metagene(x, site, range.lower, range.upper, experiments,
-  title = "Metagene Site Coverage")
+  normalize = FALSE, title = "Metagene Site Coverage", tick = 10)
 }
 \arguments{
 \item{x}{ribo.object or data.table}
@@ -18,7 +18,11 @@ plot_metagene(x, site, range.lower, range.upper, experiments,
 
 \item{experiments}{list of experiments}
 
+\item{normalize}{When TRUE, normalizes the data by the total reads.}
+
 \item{title}{title of the generated plot}
+
+\item{tick}{x-axis labeling increment}
 }
 \description{
 The function \code{\link{plot_metagene}} plots the metagene site coverage,

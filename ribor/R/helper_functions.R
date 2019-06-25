@@ -16,14 +16,59 @@ get_reference_lengths <- function(ribo.object){
 }
 
 
+get_content_info <- function(ribo.handle) {
+  experiments        <- h5ls(ribo.handle&'experiments', recursive = FALSE)$name
+  length <- length(experiments)
+  
+  #creates the separate lists for reads, coverage, rna.seq, and metadata
+  #to eventually put in a data frame
+  reads.list    <- vector(mode = "integer", length = length)
+  coverage.list <- vector(mode = "logical", length = length)
+  rna.seq.list  <- vector(mode = "logical", length = length)
+  metadata.list <- vector(mode = "logical", length = length)
+  
+  #ls function provides information about the contents of each experiment
+  ls <- h5ls(ribo.handle)
+  
+  #loop over all of the experiments
+  for (i in 1:length) {
+    experiment <- experiments[i]
+    #gathers information on the number of reads for each experiment by looking at
+    #the attributes
+    name           <- paste("/experiments/", experiment, sep = "")
+    attribute      <- h5readAttributes(ribo.handle, name)
+    reads.list[i]     <- attribute[["total_reads"]]
+    
+    #creates separate logical lists to denote the presence of
+    #reads, coverage, RNA-seq, metadata
+    metadata.list[i]  <- ("metadata" %in% names(attribute))
+    
+    group.contents <- ls[ls$group == name,]
+    group.names    <- group.contents$name
+    
+    coverage.list[i]  <- ("coverage" %in% group.names)
+    rna.seq.list[i]   <- ("rnaseq" %in% group.names)
+  }
+  
+  experiments.info       <- data.table(experiment  = experiments,
+                                       total.reads = reads.list,
+                                       coverage    = coverage.list,
+                                       rna.seq     = rna.seq.list,
+                                       metadata    = metadata.list)
+  return(experiments.info)
+}
+
+
 get_attributes <- function(ribo.object) {
   # Retrieves the attributes of the ribo.object 
   handle  <- ribo.object$handle
-  result  <- h5readAttributes(handle, "/")
-
-  #time does not serve much use
-  result <- result[ -which(names(result) == "time")]
-  return(result)
+  attribute <- h5readAttributes(handle, "/")
+  if ("metadata" %in% names(attribute)) {
+    raw.result <- yaml.load(string = attribute[["metadata"]])
+    attribute <- attribute[-which(names(attribute) == "metadata")]
+    attribute <- c(attribute, raw.result)
+  }
+  return(attribute[-which(names(attribute) == "time")])
 }
 
 get_read_lengths <- function(ribo.object) {

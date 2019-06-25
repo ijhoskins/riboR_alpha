@@ -4,7 +4,7 @@ library(ribor)
 ribo.object<- ribo("sample.ribo")
 
 rc_1 <- get_region_counts(ribo.object,
-                          c("UtR5", "cDs", "utr3"),
+                          regions = c("UtR5", "cDs", "utr3"),
                           2,
                           5,
                           experiments = "Hela_1")
@@ -17,7 +17,7 @@ test_that("get_region_counts- size",
 
 
 rc_all <- get_region_counts(ribo.object,
-                          c("UtR5", "UTR5j", "cDs", "utr3j", "utr3"),
+                          regions = c("UtR5", "UTR5j", "cDs", "utr3j", "utr3"),
                           2,
                           5,
                           experiments = "Hela_1")
@@ -35,7 +35,7 @@ test_that("get_region_counts- total count",
            expect_equal(actual, expected))
 
 rc_3 <- get_region_counts(ribo.object,
-                          c("CDS"),
+                          regions = c("CDS"),
                           2,
                           5,
                           length = TRUE,
@@ -55,7 +55,7 @@ test_that("get_region-count- preserving transcripts",
           expect_equal(actual, expected))
 
 rc_4 <- get_region_counts(ribo.object,
-                          c("UtR5j"),
+                          regions = c("UtR5j"),
                           2,
                           5,
                           length = FALSE,

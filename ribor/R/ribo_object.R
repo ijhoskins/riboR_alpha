@@ -22,6 +22,7 @@
 #'        information about the transcripts such as
 #'        names and lengths
 #' @importFrom rhdf5 H5Fopen h5readAttributes h5ls h5read
+#' @importFrom hash hash
 #' @export
 ribo <- function(name){
   ribo.handle   <- H5Fopen(name)
@@ -29,61 +30,30 @@ ribo <- function(name){
 
   transcript.names   <- h5read(ribo.handle&'reference',
                               name = "reference_names")
+  
   transcript.lengths <- h5read(ribo.handle&'reference',
                               name = "reference_lengths")
-  names(transcript.lengths) <- transcript.names
-  total.ref <- length(transcript.names)
-  transcript.offset  <- vector("list", total.ref)
-  transcript.offset[[1]] <- 0
-
-  for (i in 2:total.ref) {
-    transcript.offset[[i]] <- transcript.offset[[i-1]] + transcript.lengths[[i-1]]
-  }
-  names(transcript.offset) <- transcript.names
-  length.offset <- transcript.offset[[total.ref]] +
-                   transcript.lengths[total.ref]
-  #creates the separate lists for reads, coverage, rna.seq, and metadata
-  #to eventually put in a data frame
-  reads.list    <- list()
-  coverage.list <- list()
-  rna.seq.list  <- list()
-  metadata.list <- list()
+  num.transcripts <- length(transcript.names)
   
-  #ls function provides information about the contents of each experiment
-  ls <- h5ls(ribo.handle)
-  experiments        = h5ls(ribo.handle&'experiments', recursive = FALSE)$name
-  #loop over all of the experiments
-  for (experiment in experiments) {
-    #gathers information on the number of reads for each experiment by looking at
-    #the attributes
-    name           <- paste("/experiments/", experiment, sep = "")
-    attribute      <- h5readAttributes(ribo.handle, name)
-    reads.list     <- c(reads.list, attribute[["total_reads"]])
-    
-    
-    #creates separate logical lists to denote the presence of
-    #reads, coverage, RNA-seq, metadata
-    has.metadata   <- ("metadata" %in% names(attribute))
-    metadata.list  <- c(metadata.list, has.metadata)
-    
-    group.contents <- ls[ls$group == name,]
-    group.names    <- group.contents$name
-    
-    has.coverage   <- ("coverage" %in% group.names)
-    coverage.list  <- c(coverage.list, has.coverage)
-    
-    has.rna.seq    <- ("rnaseq" %in% group.names)
-    rna.seq.list   <- c(rna.seq.list, has.rna.seq)
+  hash.value <- rep(list(c("offset" = 0, "length" = 0)), length = num.transcripts)
+  names(hash.value) <- transcript.names
+  hash.value[[1]]["length"] <-  transcript.lengths[[1]]
+  
+  for (i in 2:num.transcripts) {
+    hash.value[[i]][["offset"]] <- hash.value[[i - 1]][["length"]] + hash.value[[i - 1]][["offset"]]
+    hash.value[[i]][["length"]] <- transcript.lengths[[i]]
   }
   
-  experiments.info       <- data.table(experiment    = experiments,
-                                       reads    = reads.list,
-                                       coverage = coverage.list,
-                                       rna.seq  = rna.seq.list,
-                                       metadata = metadata.list)
+  transcript.info <- hash(hash.value)
+  length.offset <- hash.value[[num.transcripts]][["offset"]] +
+                   hash.value[[num.transcripts]][["length"]]
+  
+  names(length.offset) <- NULL
+  
+  transcript.info <- hash(hash.value)
   
   ribo.contents <- list(handle             = ribo.handle,
-                        experiments        = experiments,
+                        experiments        = h5ls(ribo.handle&'experiments', recursive = FALSE)$name,
                         format.version     = attributes$format_version,
                         reference          = attributes$reference,
                         length.max         = attributes$length_max,
@@ -91,10 +61,8 @@ ribo <- function(name){
                         left.span          = attributes$left_span,
                         right.span         = attributes$right_span,
                         length.offset      = length.offset,
-                        experiment.info    = experiments.info,
-                        transcript.offset  = transcript.offset,
-                        transcript.names   = transcript.names,
-                        transcript.lengths = transcript.lengths)
+                        experiment.info    = get_content_info(ribo.handle),
+                        transcript.info    = transcript.info)
   attr(ribo.contents, "class") <- "ribo"
   return(ribo.contents)
 }
@@ -108,25 +76,27 @@ ribo <- function(name){
 #' object, turned into a data.table. The entries are then converted to a character,
 #' customly formatted, and printed.
 #' 
-#' @param ribo.object object of class "ribo"
+#' @param x object of class "ribo"
+#' @param ... additional arguments that have no function yet 
 #' @importFrom data.table as.data.table data.table
+#' @importFrom hash keys
 #' @export
-print.ribo <- function(ribo.object) {
-  values <- "File Information"
+print.ribo <- function(x, ...) {
+  check_ribo(x)
   attributes <- c("format version", "reference", "min read length",
                   "max read length", "left span", "right span", "transcript count")
-  left.span  <- ribo.object$left.span 
-  right.span <- ribo.object$right.span 
-  min.length <- ribo.object$length.min
-  max.length <- ribo.object$length.max
-  format.version <- ribo.object$format.version
-  reference      <- ribo.object$reference 
-  transcripts <- length(ribo.object$transcript.names)
-  experiment.info <- ribo.object$experiment.info
+  left.span  <- x$left.span 
+  right.span <- x$right.span 
+  min.length <- x$length.min
+  max.length <- x$length.max
+  format.version <- x$format.version
+  reference      <- x$reference 
+  transcripts <- length(x$transcript.info)
+  experiment.info <- x$experiment.info
   
   file.values <- c(format.version, reference, min.length, max.length,
                  left.span, right.span, transcripts)
-  file.info   <- data.table("---info--- " = attributes,
+  file.info   <- data.table("info" = attributes,
                             " " = file.values)
   
   name.width <- max(max(sapply(file.info, nchar)), max(sapply(names(file.info), nchar)))
@@ -151,6 +121,5 @@ print.ribo <- function(ribo.object) {
   cat("\n")
   cat("Dataset Information:\n")
   print(data.table(experiment.info), row.names = FALSE, quote = FALSE)
-  invisible(ribo.object)
+  invisible(x)
 }
-

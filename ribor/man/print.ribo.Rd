@@ -4,10 +4,12 @@
 \alias{print.ribo}
 \title{Printing "ribo" objects}
 \usage{
-\method{print}{ribo}(ribo.object)
+\method{print}{ribo}(x, ...)
 }
 \arguments{
-\item{ribo.object}{object of class "ribo"}
+\item{x}{object of class "ribo"}
+
+\item{...}{additional arguments that have no function yet}
 }
 \description{
 Print a ribo object

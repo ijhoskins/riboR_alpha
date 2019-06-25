@@ -9,13 +9,14 @@ Description: The ribor package provides an R Interface for .ribo files. It provi
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.4.0)
+Depends: R (>= 3.6.0)
 biocViews:
     Software
     Infrastructure
 Imports:
     data.table,
     dplyr,
+    hash,
     ggplot2,
     rhdf5,
     rlang,
