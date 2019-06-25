@@ -35,5 +35,6 @@ script:
   - R CMD build ./ribor/ --no-build-vignettes --no-manual
   - PKG_FILE_NAME=$(ls -1t *.tar.gz | head -n 1)
   - R CMD check "${PKG_FILE_NAME}" --no-build-vignettes --no-manual
+  - Rscript -e 'install.packages("testthat", dependencies = TRUE)'
   - cd ribor/tests
   - Rscript -e 'library(testthat); library(ribor) ; testthat::test_check("ribor")'
