@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/ribosomeprofiling/ribogadgets_alpha.svg?branch=master)](https://travis-ci.com/ribosomeprofiling/ribogadgets_alpha)
+[![Build Status](https://travis-ci.com/ribosomeprofiling/riboR_alpha.svg?branch=master)](https://travis-ci.com/ribosomeprofiling/riboR_alpha)
 
 # riboR_alpha
 R api for ribo files
