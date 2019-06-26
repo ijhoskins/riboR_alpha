@@ -11,7 +11,49 @@ rnaseq <- get_rnaseq(ribo.object,
                      tidy = FALSE,
                      experiments = experiments)
 
-actual <- c(nrow(rnaseq_tidy), ncol(rnaseq_tidy))
+actual <- get_rnaseq(ribo.object,
+                     regions = c("UTR3j", "cds"),
+                     tidy = FALSE,
+                     experiments = experiments)
+
+expected <-rnaseq[, -c("UTR5", "UTR5J", "UTR3")]
+
+test_that("get_rnaseq = non-tidy CDS and UTR3J",
+          expect_true(all(actual == expected)))
+
+actual <- get_rnaseq(ribo.object,
+                     regions = c("UTR3", "cds", "utR5"),
+                     tidy = FALSE,
+                     experiments = experiments)
+
+expected <-rnaseq[, -c("UTR3J", "UTR5J")]
+
+test_that("get_rnaseq = non-tidy CDS and UTR3J",
+          expect_true(all(actual == expected)))
+
+actual   <- get_rnaseq(ribo.object,
+                         tidy = TRUE,
+                         regions = c("UTR5"),
+                         experiments = experiments)
+
+expected <- rnaseq_tidy[rnaseq_tidy$region == "UTR5", ]
+
+
+test_that("get_rnaseq- tidy UTR5 only",
+          expect_true(all(actual == expected)))
+
+actual   <- get_rnaseq(ribo.object,
+                       tidy = TRUE,
+                       regions = c("CDS", "utR5j"),
+                       experiments = experiments)
+
+expected <- rnaseq_tidy[rnaseq_tidy$region == "UTR5J" | 
+                        rnaseq_tidy$region == "CDS"]
+
+test_that("get_rnaseq- tidy UTR5 and CDS",
+          expect_true(all(actual == expected)))
+
+actual   <- c(nrow(rnaseq_tidy), ncol(rnaseq_tidy))
 expected <- c(45, 4)
 
 test_that("get_rnaseq- tidy version size",

@@ -28,7 +28,7 @@ expected <- c(5, 3)
 test_that("get_region_counts- size",
           expect_equal(actual, expected))
 
-actual   <- sum(colSums(rc_all[, 2]))
+actual   <- sum(rc_all[, 3])
 expected <- 118 
 
 test_that("get_region_counts- total count",
@@ -48,7 +48,7 @@ expected <- c(3, 4)
 test_that("get_region_counts- size",
           expect_equal(actual, expected))
 
-actual <- rc_3[1, ][["region.count"]]
+actual <- rc_3[1, ][["count"]]
 expected <- 13
 
 test_that("get_region-count- preserving transcripts",
@@ -67,7 +67,7 @@ expected <- c(20, 4)
 test_that("get_region-count- size",
           expect_equal(actual, expected))
 
-actual <- colSums(rc_4[, 3])[[1]]
+actual <- sum(rc_4$count)
 expected <- 102
 test_that("get_region_count- preserving lengths",
           expect_equal(actual, expected))

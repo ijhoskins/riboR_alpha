@@ -55,9 +55,10 @@ plot_region_counts(sample,
 #data.table use case
 #obtains the region counts at each individual read length, summed across every transcript
 region.counts <- get_region_counts(sample,
-                                   regions,
+                                   regions = regions,
                                    range.lower = 2,
                                    range.upper = 5,
+                                   tidy = TRUE,
                                    length = TRUE,
                                    transcript = TRUE)
 

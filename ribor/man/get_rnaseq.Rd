@@ -4,13 +4,15 @@
 \alias{get_rnaseq}
 \title{Information on the RNA-Seq data of the experiments, if any}
 \usage{
-get_rnaseq(ribo.object, tidy = TRUE,
-  experiments = get_experiments(ribo.object))
+get_rnaseq(ribo.object, tidy = TRUE, regions = c("UTR5", "UTR5J",
+  "CDS", "UTR3J", "UTR3"), experiments = get_experiments(ribo.object))
 }
 \arguments{
 \item{ribo.object}{S3 object of class "ribo"}
 
 \item{tidy}{logical value denoting whether or not the user wants a tidy format}
+
+\item{regions}{Specific region(s) of interest}
 
 \item{experiments}{list of experiment names}
 }
@@ -38,9 +40,11 @@ file.path <- system.file("extdata", "sample.ribo", package = "ribor")
 sample <- ribo(file.path)
 
 #list out the experiments of interest that have RNA-Seq data
-experiments = c("Hela_1", "Hela_2", "WT_1")
+experiments <- c("Hela_1", "Hela_2", "WT_1")
+regions <- c("UTR5", "CDS", "UTR3")
 rnaseq.data <- get_rnaseq(ribo.object = sample,
                           tidy = TRUE,
+                          regions = regions,
                           experiments = experiments)
 
 }

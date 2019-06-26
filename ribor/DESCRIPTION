@@ -5,7 +5,7 @@ Authors@R: c(
     person("Michael", "Geng", email = "michaelgeng@utexas.edu", role = "cre"),
     person("Hakan", "Ozadam", email = "hakan.ozadam@gmail.com", role = "aut"),
     person("Can", "Cenik", email = "ccenik@austin.utexas.edu", role = "aut"))
-Description: The ribor package provides an R Interface for .ribo files. It provides functionality to read the .ribo file, which is of HDF5 format, and perform common analyses on its contents.
+Description: The ribor package provides an R Interface for .ribo files. It provides functionality to read the .ribo file, which is of HDF5 format, and performs common analyses on its contents.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -16,8 +16,8 @@ biocViews:
 Imports:
     data.table,
     dplyr,
-    hash,
     ggplot2,
+    hash,
     rhdf5,
     rlang,
     stats,

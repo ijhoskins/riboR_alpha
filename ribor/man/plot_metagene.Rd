@@ -79,6 +79,4 @@ data <- get_tidy_metagene(sample,
 #plot the metagene data
 plot_metagene(data)
 
-
-
 }

@@ -17,15 +17,17 @@
 #' sample <- ribo(file.path)
 #'
 #' #list out the experiments of interest that have RNA-Seq data
-#' experiments = c("Hela_1", "Hela_2", "WT_1")
+#' experiments <- c("Hela_1", "Hela_2", "WT_1")
+#' regions <- c("UTR5", "CDS", "UTR3")
 #' rnaseq.data <- get_rnaseq(ribo.object = sample,
 #'                           tidy = TRUE,
+#'                           regions = regions,
 #'                           experiments = experiments)
 #'
 #' @param ribo.object S3 object of class "ribo"
 #' @param tidy logical value denoting whether or not the user wants a tidy format
 #' @param experiments list of experiment names
-#'
+#' @param regions Specific region(s) of interest
 #' @return
 #' Returns a data table that contains the transcript name, experiment, and
 #' RNA-seq abundance
@@ -38,12 +40,11 @@
 #' @export
 get_rnaseq <- function(ribo.object,
                        tidy = TRUE,
+                       regions = c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3"),
                        experiments = get_experiments(ribo.object)) {
-
+  regions <- check_regions(ribo.object,
+                           regions)
   ribo.experiments <- get_experiments(ribo.object)
-
-
-  check_experiments(ribo.object, experiments)
 
   #get just the experiments that exist
   rnaseq.experiments <- check_rnaseq(ribo.object, experiments)
@@ -52,20 +53,24 @@ get_rnaseq <- function(ribo.object,
   ref.names <- get_reference_names(ribo.object)
   ref.length <- length(ref.names)
   total.experiments <- length(rnaseq.experiments)
-  num.regions <- 5
+  num.regions <- length(regions)
   handle <- ribo.object$handle
-
+  
   result <- matrix(nrow = ref.length * total.experiments,
                    ncol = num.regions)
-  colnames(result) <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
-
+  colnames(result) <- regions
+  
+  values <- c("UTR5" = 1, "UTR5J" = 2, "CDS" = 3, "UTR3J" = 4, "UTR3" = 5)
+  cols   <- unname(values[regions]) 
+  rows   <- c(1:ref.length)
+  
   #generate the untidy version
   for (index in 1:total.experiments) {
-      experiment <- rnaseq.experiments[index]
-      path = paste("/experiments/", experiment, "/rnaseq/rnaseq", sep = "")
-      row.start <- (index - 1) * ref.length + 1
-      row.stop <- row.start + ref.length - 1
-      result[row.start:row.stop, ] <- t(h5read(handle, path))
+    experiment <- rnaseq.experiments[index]
+    path <- paste("/experiments/", experiment, "/rnaseq/rnaseq", sep = "")
+    row.start <- (index - 1) * ref.length + 1
+    row.stop <- row.start + ref.length - 1
+    result[row.start:row.stop, ] <- t(h5read(handle, path, index = list(cols, rows)))
   }
 
   rnaseq <- rep(rnaseq.experiments, each = ref.length)
@@ -75,7 +80,7 @@ get_rnaseq <- function(ribo.object,
                        transcript = transcripts,
                        result)
   if (tidy) {
-    result <- gather(result, "region", "abundance", c("UTR5":"UTR3"))
+    result <- setDT(gather(result, "region", "abundance", regions))
   }
   return(result)
 }

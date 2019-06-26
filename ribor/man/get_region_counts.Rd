@@ -5,8 +5,8 @@
 \title{Retrieves the region counts from a .ribo file}
 \usage{
 get_region_counts(ribo.object, range.lower, range.upper, length = TRUE,
-  transcript = TRUE, regions = c("UTR5", "UTR5J", "CDS", "UTR3J",
-  "UTR3"), experiments = get_experiments(ribo.object))
+  transcript = TRUE, tidy = TRUE, regions = c("UTR5", "UTR5J", "CDS",
+  "UTR3J", "UTR3"), experiments = get_experiments(ribo.object))
 }
 \arguments{
 \item{ribo.object}{S3 "ribo" class object}
@@ -18,6 +18,8 @@ get_region_counts(ribo.object, range.lower, range.upper, length = TRUE,
 \item{length}{Option to condense the read lengths together, preserve the transcripts}
 
 \item{transcript}{Option to condense the transcripts together, preserve the read lengths}
+
+\item{tidy}{logical value denoting whether or not the user wants a tidy format}
 
 \item{regions}{Specific region of interest}
 
@@ -73,12 +75,13 @@ regions <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
 experiments <- c("Hela_1", "Hela_2", "WT_1")
 
 #obtains the region counts at each individual read length, summed across every transcript
-region.counts <- get_region_counts(sample,
-                                   regions,
+region.counts <- get_region_counts(ribo.object = sample,
+                                   regions = regions,
                                    range.lower = 2,
                                    range.upper = 5,
                                    length = FALSE,
                                    transcript = TRUE,
-                                   experiments = )
+                                   tidy = FALSE,
+                                   experiments = experiments)
 
 }

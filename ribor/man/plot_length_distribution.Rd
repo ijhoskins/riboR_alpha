@@ -58,7 +58,7 @@ sample <- ribo(file.path)
 regions <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
 experiments <- c("Hela_1", "Hela_2", "wt_1")
 
-plot_length_distribution(sample,
+plot_length_distribution(x = sample,
                          region = "CDS",
                          range.lower = 2,
                          range.upper = 5,
@@ -68,11 +68,12 @@ plot_length_distribution(sample,
 
 #data.table use case
 #obtains the region counts at each individual read length, summed across every transcript
-region.counts <- get_region_counts(sample,
-                                   regions,
+region.counts <- get_region_counts(ribo.object = sample,
                                    range.lower = 2,
                                    range.upper = 5,
                                    length = FALSE,
+                                   tidy = TRUE,
+                                   regions = regions,
                                    transcript = TRUE)
 
 #the param 'length' must be set to FALSE and param 'transcript' must be set

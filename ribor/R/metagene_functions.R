@@ -327,8 +327,6 @@ check_metagene_input <- function(ribo.object,
 #' #plot the metagene data
 #' plot_metagene(data)
 #'
-#'
-#'
 #' @importFrom data.table is.data.table
 #' @importFrom dplyr left_join mutate
 #' @importFrom ggplot2 ggplot geom_line theme_bw ggtitle aes

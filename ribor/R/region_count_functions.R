@@ -45,46 +45,47 @@
 #' experiments <- c("Hela_1", "Hela_2", "WT_1")
 #'
 #' #obtains the region counts at each individual read length, summed across every transcript
-#' region.counts <- get_region_counts(sample,
-#'                                    regions,
+#' region.counts <- get_region_counts(ribo.object = sample,
+#'                                    regions = regions,
 #'                                    range.lower = 2,
 #'                                    range.upper = 5,
 #'                                    length = FALSE,
 #'                                    transcript = TRUE,
-#'                                    experiments = )
+#'                                    tidy = FALSE,
+#'                                    experiments = experiments)
 #'
 #' @param ribo.object S3 "ribo" class object
-#' @param regions Specific region of interest
 #' @param range.lower Lower bound of the read length
 #' @param range.upper Upper bound of the read length
 #' @param length Option to condense the read lengths together, preserve the transcripts
 #' @param transcript Option to condense the transcripts together, preserve the read lengths
+#' @param tidy logical value denoting whether or not the user wants a tidy format
+#' @param regions Specific region of interest
 #' @param experiments List of experiment names
 #' @return A data table of the region counts
 #' @importFrom rhdf5 h5read
 #' @importFrom data.table data.table
+#' @importFrom tidyr gather
 #' @export
 get_region_counts <- function(ribo.object,
                               range.lower,
                               range.upper,
                               length = TRUE,
                               transcript = TRUE,
+                              tidy = TRUE,
                               regions = c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3"),
                               experiments = get_experiments(ribo.object)) {
-  if (typeof(regions) == 'character') {
-    regions <- toupper(as.vector(regions))
-  }
 
   range.info <- c(range.lower = range.lower,
                   range.upper = range.upper)
 
-  check_rc_input(ribo.object,
-                 regions,
-                 range.info,
-                 experiments)
+  regions <- check_rc_input(ribo.object,
+                            regions,
+                            range.info,
+                            experiments)
 
   conditions <- c(transcript = transcript,
-                     length = length)
+                  length     = length)
 
   ribo.experiments <- get_experiments(ribo.object)
   handle <- ribo.object$handle
@@ -102,33 +103,34 @@ get_region_counts <- function(ribo.object,
 
   result <- data.table()
 
-  for (region in regions) {
-    column.index <- region.list[[toupper(region)]]
-    region.data <- determine_matrix_size(conditions,
-                                         ref.length,
-                                         1,
-                                         total.experiments,
-                                         read.length.range)
+  values <- c("UTR5" = 1, "UTR5J" = 2, "CDS" = 3, "UTR3J" = 4, "UTR3" = 5)
+  cols   <- unname(values[regions]) 
+  total.regions <- length(regions)
+  
+  region.data <- determine_matrix_size(conditions,
+                                       ref.length,
+                                       total.regions,
+                                       total.experiments,
+                                       read.length.range)
 
-    colnames(region.data) <- "region.count"
+  colnames(region.data) <- regions
 
-    region.info <- list(ribo.min            = ribo.min,
-                        range.info          = range.info,
-                        ref.names           = ref.names,
-                        total.experiments   = total.experiments,
-                        matched.experiments = matched.experiments,
-                        ref.length          = ref.length,
-                        column.index        = column.index,
-                        conditions          = conditions)
+  region.info <- list(ribo.min            = ribo.min,
+                      range.info          = range.info,
+                      ref.names           = ref.names,
+                      total.experiments   = total.experiments,
+                      matched.experiments = matched.experiments,
+                      ref.length          = ref.length,
+                      column.index        = cols,
+                      conditions          = conditions)
 
-    current.data <- fill_region(handle, region.info, region.data)
-    result       <- rbind(result, current.data)
+  result <- fill_region(handle, region.info, region.data)
+  
+  if (tidy) {
+    result <- setDT(gather(result, "region", "count", regions))
   }
-
-  #calculates how many rows that each region has
-  rep <- nrow(result)/length(regions)
-
-  return(cbind(result, region = rep(unlist(regions), each = rep)))
+  
+  return(result)
 }
 
 
@@ -149,20 +151,23 @@ fill_region <- function (handle,
 
   for (i in 1:total.experiments) {
     experiment <- matched.experiments[i]
-    path <- paste("/experiments/", experiment,
+    path <- paste("/experiments/", 
+                  experiment,
                   "/region_counts/region_counts", sep ="")
     for (current.length in (range.lower:range.upper)) {
       offset <- ref.length * (current.length - ribo.min) + 1
       row.index    <- c(offset: (offset + ref.length - 1))
-      region.count <- t(h5read(handle, path,
+      region.count <- t(h5read(handle, 
+                               path,
                                index = list(column.index, row.index)))
-      fill.params <- list(index = i,
-                          conditions = region.info[["conditions"]],
-                          ref.length = ref.length,
-                          result = region.data,
+      
+      fill.params <- list(index          = i,
+                          conditions     = region.info[["conditions"]],
+                          ref.length     = ref.length,
+                          result         = region.data,
                           current.length = current.length,
-                          range.info = region.info[["range.info"]],
-                          data = region.count)
+                          range.info     = region.info[["range.info"]],
+                          data           = region.count)
 
       region.data <- fill_matrix(fill.params)
     }
@@ -183,24 +188,40 @@ check_rc_input <- function(ribo.object,
                            experiments) {
   #helper function that checks for valid parameters given by the user
   #calls error messages on any incorrect parameters
-  region.options <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
-
-  if (typeof(regions) != 'list' & typeof(regions) != "character") {
-    stop("Please specify the regions as a single string, a vector, or a list.")
-  }
-
-  for (region in regions) {
-    if (!region %in% region.options) {
-      stop("'", region, "'", " is not an option. Please indicate the region with
-         one of the following: 'UTR5', 'UTR5J, 'CDS', 'UTR3J', 'UTR3'")
-    }
-  }
+  regions <- check_regions(ribo.object, regions)
 
   range.lower <- range.info[["range.lower"]]
   range.upper <- range.info[["range.upper"]]
+  
   check_lengths(ribo.object, range.lower, range.upper)
   check_experiments(ribo.object, experiments)
+  return(regions)
 }
+
+check_regions <- function(ribo.object,
+                          regions) {
+  regions <- toupper(regions)
+  region.options <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
+  
+  if (typeof(regions) != 'list' & typeof(regions) != "character") {
+    stop("Please specify the regions as a single string, a vector, or a list.",
+         call. = FALSE)
+  }
+  
+  for (region in regions) {
+    if (!region %in% region.options) {
+      stop("'", region, "'", " is not an option. Please indicate the region with
+           one of the following: 'UTR5', 'UTR5J, 'CDS', 'UTR3J', 'UTR3'",
+           call. = FALSE)
+    }
+  }
+ 
+  regions <- factor(regions, levels = c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3"), ordered = TRUE)
+  regions <- as.vector(sort(regions))
+  return(regions)
+}
+
+
 
 #' Plots the length distribution
 #'
@@ -238,7 +259,7 @@ check_rc_input <- function(ribo.object,
 #' regions <- c("UTR5", "UTR5J", "CDS", "UTR3J", "UTR3")
 #' experiments <- c("Hela_1", "Hela_2", "wt_1")
 #'
-#' plot_length_distribution(sample,
+#' plot_length_distribution(x = sample,
 #'                          region = "CDS",
 #'                          range.lower = 2,
 #'                          range.upper = 5,
@@ -248,11 +269,12 @@ check_rc_input <- function(ribo.object,
 #'
 #' #data.table use case
 #' #obtains the region counts at each individual read length, summed across every transcript
-#' region.counts <- get_region_counts(sample,
-#'                                    regions,
+#' region.counts <- get_region_counts(ribo.object = sample,
 #'                                    range.lower = 2,
 #'                                    range.upper = 5,
 #'                                    length = FALSE,
+#'                                    tidy = TRUE,
+#'                                    regions = regions,
 #'                                    transcript = TRUE)
 #'
 #' #the param 'length' must be set to FALSE and param 'transcript' must be set
@@ -307,10 +329,10 @@ plot_length_distribution<- function(x,
                            transcript = TRUE,
                            experiments = experiments)
   } else if (is.data.table(x)){
-    col.names <- c("experiment", "length", "region.count", "region")
+    col.names <- c("experiment", "length", "region", "count")
     mismatch <- !all(names(x) == col.names) || typeof(x[[1]]) != "character"||
-    typeof(x[[2]]) != "integer"  || typeof(x[[3]]) != "double" ||
-    typeof(x[[4]]) != "character" || ncol(x) != 4
+    typeof(x[[2]]) != "integer"  || typeof(x[[3]]) != "character" ||
+    typeof(x[[4]]) != "double" || ncol(x) != 4
     if (mismatch) {
       stop("Please make sure that the data table is of the correct format.")
     }
@@ -319,12 +341,12 @@ plot_length_distribution<- function(x,
   }
 
   y.axis <- "Count"
-  y.value <- sym("region.count")
+  y.value <- sym("count")
 
   if (percentage) {
-    total <- aggregate(x$region.count, by = list(experiment= x$experiment), FUN=sum)
+    total <- aggregate(x$count, by = list(experiment= x$experiment), FUN=sum)
     x <- x %>%  left_join(total, by= "experiment") %>%
-      mutate(fraction = .data$region.count/x) %>%
+      mutate(fraction = .data$count/x) %>%
       select(-x)
     y.axis <- "Frequency"
     y.value <- sym("fraction")
@@ -377,9 +399,10 @@ plot_length_distribution<- function(x,
 #' #data.table use case
 #' #obtains the region counts at each individual read length, summed across every transcript
 #' region.counts <- get_region_counts(sample,
-#'                                    regions,
+#'                                    regions = regions,
 #'                                    range.lower = 2,
 #'                                    range.upper = 5,
+#'                                    tidy = TRUE,
 #'                                    length = TRUE,
 #'                                    transcript = TRUE)
 #'
@@ -416,17 +439,17 @@ plot_region_counts <- function(x,
       warning("Please provide params 'range.lower' and 'range.upper'")
     }
     check_lengths(x, range.lower, range.upper)
-    all.regions <- get_region_counts(x,
-                                     regions = regions,
+    all.regions <- get_region_counts(ribo.object = x,
+                                     regions     = regions,
                                      range.lower = range.lower,
                                      range.upper = range.upper,
-                                     length = TRUE,
-                                     transcript = TRUE,
+                                     length      = TRUE,
+                                     transcript  = TRUE,
                                      experiments = experiments)
   } else if (is.data.table(x)) {
-    col.names <- c("experiment", "region.count", "region")
+    col.names <- c("experiment", "region", "count")
     mismatch <- !all(names(x) == col.names) || typeof(x[[1]]) != "character"||
-      typeof(x[[2]]) != "double" || typeof(x[[3]]) != "character" || ncol(x) != 3
+      typeof(x[[2]]) != "character" || typeof(x[[3]]) != "double" || ncol(x) != 3
     if (mismatch) {
       stop("Please make sure that the data table is of the correct format.")
     } else if (!identical(unique(x$region), regions)) {
@@ -434,31 +457,42 @@ plot_region_counts <- function(x,
     }
     all.regions <- x
   } else {
-    stop("Please provide a ribo object.")
+    stop("Please provide a ribo object or a data.table of the correct format.")
   }
-
+  
+  #prepare data for visualization
   all.regions %>%
     group_by(.data$experiment) %>%
-    summarize(sum = sum(.data$region.count)) -> total.counts
+    summarize(sum = sum(.data$count)) -> total.counts
 
   total.counts %>%
     left_join(all.regions, by = "experiment") -> all.regions
 
   all.regions %>%
-    mutate(percentage = round(100 * .data$region.count/sum, 1)) %>%
-    mutate(region = factor(.data$region, levels = c("UTR3", "CDS", "UTR5"))) %>%
-    mutate(show = replace(.data$percentage, .data$region != "CDS", "")) %>% 
-    arrange(desc(.data$region)) %>%
-    ggplot(aes(x = .data$experiment, y = .data$percentage, fill = .data$region)) +
-    geom_col() +
-    coord_flip() +
-    geom_text(aes(x=.data$experiment, y= .data$percentage, label = .data$show),
-              position = position_stack(vjust=0.5),
-              size = 3) +
-    theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5),
-          panel.border = element_blank(),
-          panel.grid = element_blank()) +
-    scale_fill_discrete(breaks = c("UTR5", "CDS", "UTR3")) +
-    labs(title = title, x = "Experiment", y = "Percentage", fill = "Region")
+    mutate(percentage = round(100 * .data$count/sum, 1)) %>%
+    mutate(region = factor(.data$region, levels = c("UTR3", "CDS", "UTR5"))) ->
+    all.regions
+  
+  #text label of percentages only in the "CDS" region
+  percentages <- replace(all.regions$percentage, all.regions$region != "CDS", "") 
+  
+  all.regions %>% 
+    ggplot(aes(x    = .data$experiment, 
+               y    = .data$percentage, 
+               fill = .data$region)) +
+      geom_col() +
+      coord_flip() +
+      geom_text(aes(x     = .data$experiment, 
+                    y     = 50, 
+                    label = percentages),
+                size = 3) +
+      theme_bw() +
+      theme(plot.title   = element_text(hjust = 0.5),
+            panel.border = element_blank(),
+            panel.grid   = element_blank()) +
+      scale_fill_discrete(breaks = c("UTR5", "CDS", "UTR3")) +
+      labs(title = title,
+           fill  = "Region",
+           x     = "Experiment", 
+           y     = "Percentage")
 }

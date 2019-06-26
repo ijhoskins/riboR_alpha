@@ -87,7 +87,7 @@ print_info <- function(ribo.object) {
 #' 
 #' @seealso \code{\link{ribo}} to generate the necessary ribo.object parameter
 #' @importFrom rhdf5 h5readAttributes
-#' @importFrom yaml read_yaml yaml.load
+#' @importFrom yaml yaml.load
 #' @export
 get_metadata <- function(ribo.object, name = NULL) {
   exp.list <- get_experiments(ribo.object)
