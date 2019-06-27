@@ -10,10 +10,9 @@ get_info(ribo.object)
 \item{ribo.object}{ribo.object is an S3 object of class "ribo"}
 }
 \value{
-Returns a list of 8 elements providing the following information in order of
-format version, left_span, length_max, length_min, metagene_radius, reference,
-right_span,and a data table that provides information about each experiment, including
-names, number of reads, metadata, and its internal datasets
+Returns a list containing a nested list of file attributes, a logical 
+value denoting whether the root file has additional metadata, and a 
+data.table of information on each experiment
 }
 \description{
 The function \code{\link{get_info}} provides information on the attributes, metadata,

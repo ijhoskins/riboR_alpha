@@ -22,17 +22,21 @@ expected.table <- data.table(names    = names.list,
                              metadata = metadata.list)
 
 properties     <- list(1, 3, 5, 2, 2, "appris_human", 2)
-unnamed.actual <- actual[1:7]
+unnamed.actual <- actual[[2]]
 unname(unnamed.actual)
 
 #test get_info
 test_that("get_info- returns a list of the correct length",
-           expect_equal(length(actual), 8))
+           expect_equal(length(actual), 3))
 
-test_that("get_info- checks first seven elements",
+test_that("get_info- checks attributes",
            expect_equal(as.character(unnamed.actual),
                         as.character(properties)))
 
+metadata <- actual[[1]]
+test_that("get_info- has.metadata",
+          expect_equal(metadata,
+                       TRUE))
 
 #test get_rnaseq
 abundance.list  <- c(2.89, 15.46, 8.0, 6.42, 1.37, 0.06, 2.89, 15.46, 8.0)
@@ -61,17 +65,19 @@ hela.meta <- c("HeLa", "5 min", "HindIII", "https://www.encodeproject.org/")
 
 wt.meta <- c("WT", "5 min", "HindIII", "https://www.encodeproject.org/")
 
-actual.hela.meta <- get_metadata(ribo.object, "Hela_1")
+actual.hela.meta <- get_metadata(ribo.object, "Hela_1", print = FALSE)
 actual.hela.meta <- unname(actual.hela.meta)
 
 test_that("get_metadata- checks correct input for Hela_1",
           expect_equal(as.character(actual.hela.meta), as.character(hela.meta)))
 
-actual.wt.meta <- get_metadata(ribo.object, "WT_1")
+actual.wt.meta <- get_metadata(ribo.object, "WT_1", print = FALSE)
 actual.wt.meta <- unname(actual.wt.meta)
 
 test_that("get_metadata- checks correct input for WT_1",
           expect_equal(as.character(actual.wt.meta), as.character(wt.meta)))
 
+actual <- unname(unlist(get_metadata(ribo.object, print = FALSE)))
+expected <- c("6/24/2018", "riboflow")
 test_that("get_metadata- checks output for file with no metadata",
-          expect_warning(get_metadata(ribo.object, "Hela_2")))
+          expect_equal(actual, expected))

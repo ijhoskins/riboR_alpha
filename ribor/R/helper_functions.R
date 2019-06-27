@@ -63,11 +63,6 @@ get_attributes <- function(ribo.object) {
   # Retrieves the attributes of the ribo.object 
   handle  <- ribo.object$handle
   attribute <- h5readAttributes(handle, "/")
-  if ("metadata" %in% names(attribute)) {
-    raw.result <- yaml.load(string = attribute[["metadata"]])
-    attribute <- attribute[-which(names(attribute) == "metadata")]
-    attribute <- c(attribute, raw.result)
-  }
   return(attribute[-which(names(attribute) == "time")])
 }
 

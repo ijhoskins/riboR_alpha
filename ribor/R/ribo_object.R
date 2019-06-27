@@ -33,7 +33,9 @@ ribo <- function(name){
   
   transcript.lengths <- h5read(ribo.handle&'reference',
                               name = "reference_lengths")
+  
   num.transcripts <- length(transcript.names)
+  has.metadata   <- ("metadata" %in% names(attributes))
   
   hash.value <- rep(list(c("offset" = 0, "length" = 0)), length = num.transcripts)
   names(hash.value) <- transcript.names
@@ -61,6 +63,7 @@ ribo <- function(name){
                         left.span          = attributes$left_span,
                         right.span         = attributes$right_span,
                         length.offset      = length.offset,
+                        has.metadata       = has.metadata,
                         experiment.info    = get_content_info(ribo.handle),
                         transcript.info    = transcript.info)
   attr(ribo.contents, "class") <- "ribo"
@@ -84,7 +87,7 @@ ribo <- function(name){
 print.ribo <- function(x, ...) {
   check_ribo(x)
   attributes <- c("format version", "reference", "min read length",
-                  "max read length", "left span", "right span", "transcript count")
+                  "max read length", "left span", "right span", "has.metadata", "transcript count")
   left.span  <- x$left.span 
   right.span <- x$right.span 
   min.length <- x$length.min
@@ -92,10 +95,12 @@ print.ribo <- function(x, ...) {
   format.version <- x$format.version
   reference      <- x$reference 
   transcripts <- length(x$transcript.info)
+  has.metadata <- x$has.metadata
   experiment.info <- x$experiment.info
   
+  
   file.values <- c(format.version, reference, min.length, max.length,
-                 left.span, right.span, transcripts)
+                 left.span, right.span, has.metadata, transcripts)
   file.info   <- data.table("info" = attributes,
                             " " = file.values)
   

@@ -4,19 +4,21 @@
 \alias{get_metadata}
 \title{Retrieves the metadata of an experiment}
 \usage{
-get_metadata(ribo.object, name = NULL)
+get_metadata(ribo.object, name = NULL, print = TRUE)
 }
 \arguments{
 \item{ribo.object}{object of class 'ribo'}
 
 \item{name}{The name of the experiment}
+
+\item{print}{Logical value indicating whether or not to neatly print the output}
 }
 \value{
-If the experiment is valid, a list of elements providing all of the metadata of the  
-experiment.
+If a valid experiment name is provided, a list of elements providing all of the metadata of the  
+experiment is returned.
 
-If the name is not provided or not found, then a list of attributes 
-describing the root file is provided.
+If the name is not provided and the root file has metadata, then a list of elements
+providing all of the metadata found in the root file is returnend.
 }
 \description{
 \code{\link{get_metadata}} provides information on all of the user-inputted
